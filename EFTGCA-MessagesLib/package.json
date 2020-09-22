@@ -1,0 +1,18 @@
+{
+  "name": "efga-messages",
+  "version": "1.0.3",
+  "description": "Javascript library for efga",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "author": "Miguel S.C. <mscarceller@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^7.3.1",
+    "uuid": "8.3.0"
+  },
+  "devDependencies": {
+    "jest": "^26.1.0"
+  }
+}
