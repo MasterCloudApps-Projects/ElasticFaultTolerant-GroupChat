@@ -1,1 +1,1 @@
-# ElasticFaultTolerantGroupChat
+# Elastic & FaultTolerant GroupChat Application

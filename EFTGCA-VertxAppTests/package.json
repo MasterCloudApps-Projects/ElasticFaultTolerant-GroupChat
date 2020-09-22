@@ -1,0 +1,22 @@
+{
+  "name": "efga-vertxapplicationtests",
+  "version": "1.0.0",
+  "description": "Tests for Elastic & FaultTolerant GroupChat Application VertX Backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mscarceller/EFGA-VertxApplicationTests.git"
+  },
+  "author": "Miguel S.C.",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mscarceller/EFGA-VertxApplicationTests/issues"
+  },
+  "homepage": "https://github.com/mscarceller/EFGA-VertxApplicationTests#readme",
+  "dependencies": {
+    "efga-messages": "^1.0.3"
+  }
+}
