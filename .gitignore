@@ -25,3 +25,4 @@ EFTGCA-VertxBackend/target/maven-status/maven-compiler-plugin/testCompile/defaul
 EFTGCA-VertxBackend/target/surefire-reports/mcawebchatvx.TestMainVerticle.txt
 EFTGCA-VertxBackend/target/surefire-reports/TEST-mcawebchatvx.TestMainVerticle.xml
 EFTGCA-VertxBackend/target/test-classes/mcawebchatvx/TestMainVerticle.class
+.gitignore
