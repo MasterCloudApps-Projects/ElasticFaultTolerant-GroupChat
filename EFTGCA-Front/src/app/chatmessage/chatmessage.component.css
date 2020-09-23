@@ -1,0 +1,26 @@
+
+
+.message{
+    width: 60%;
+    padding-bottom: 5px;
+}
+
+.message.received{
+    float:left; 
+}
+
+.message.sent{
+    float:right; 
+}
+
+.message.system{
+    float:right; 
+    text-align:center;
+    color:grey;
+    font-weight:bold;
+    padding-bottom: 5px;
+    width: 100%;
+}
+
+
+

@@ -1,0 +1,57 @@
+
+<p-panel [style]="{'width':'800px'}">
+    <p-header>
+        Room: {{this.roomName}}
+    </p-header>
+
+        <p-scrollPanel  #scrollChatContainer (ngChange)="scrollToBottom()" [style]="{width: '100%', height: '400px','background-color':'#fff7e6'}">
+            <app-chatmessage *ngFor="let message of chatmessages | keyvalue: asIsOrder" 
+                [user]="(message.value.params.type!='sent') ? message.value.params.user : ''"
+                [text]="message.value.params.text"
+                [date]="message.value.params.date"
+                [type]="message.value.params.type"
+                [ack]="message.value.params.ack"
+            ></app-chatmessage>
+        </p-scrollPanel>
+    <p-footer>
+
+        <div class="p-grid">
+            <div class="p-col-10">
+                <div class="box"><input style="width:100%" type="text" (keydown.enter)="sendMessage()" [(ngModel)]="this.messageText" pInputText /> &nbsp;</div>
+            </div>
+            <div class="p-col-2">
+                <div class="box"><button pButton type="button" style="width: 100%;" (click)="sendMessage()" label="Send" class="ui-button-rounded ui-button-success"></button></div>
+            </div>   
+        </div>
+        
+    </p-footer>
+
+</p-panel>
+
+<span>Server Status: {{this.serverStatus}}</span>
+<br>
+<span>User Status: {{this.userStatus}}</span>
+
+<p-dialog header="Room name" [(visible)]="this.displayRoomDialog" [modal]="true">
+    <br>
+    <span class="ui-float-label">
+        <input id="float-input" type="text" size="30" [(ngModel)]="roomName" pInputText> 
+        <label for="float-input">Room name</label>
+    </span>
+    <p-footer>
+        <button type="button" pButton icon="pi pi-check" (click)="checkRoomName()" label="Accept"></button>
+    </p-footer>
+</p-dialog>
+
+<p-dialog header="User name" [(visible)]="this.displayUserDialog" [modal]="true">
+    <br>
+    <span class="ui-float-label">
+        <input id="float-input" type="text" size="30" [(ngModel)]="userName" pInputText> 
+        <label for="float-input">User name</label>
+    </span>
+    <p-footer>
+        <button type="button" pButton icon="pi pi-check" (click)="checkUserName()" label="Accept"></button>
+    </p-footer>
+</p-dialog>
+
+
