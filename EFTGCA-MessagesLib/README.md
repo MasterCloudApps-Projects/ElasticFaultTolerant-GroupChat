@@ -1,4 +1,4 @@
-# Elastic & FaultTolerant GroupChat Application Messages Lib (v0.2)
+# Elastic & FaultTolerant GroupChat Application Messages Lib
 
 Javascript module to manage messages between frontend apps and chat server. 
 
