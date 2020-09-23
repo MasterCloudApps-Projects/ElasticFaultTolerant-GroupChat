@@ -1,0 +1,11 @@
+version: '3'
+services:
+
+  webchat:
+    build: .
+    image: mscarceller/webchat:1.0.0
+    container_name: "webchat"
+    hostname: "webchat"
+    ports:
+      - '8080:8080'
+      - '8081:8081'

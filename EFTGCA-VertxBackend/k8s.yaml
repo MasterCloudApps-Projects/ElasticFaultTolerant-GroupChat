@@ -1,0 +1,210 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: webchat
+
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: webchat-ingress
+  namespace: webchat
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "1800"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "1800"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/secure-backends: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/websocket-services: webchat
+    nginx.org/websocket-services: webchat
+spec:
+  rules:
+  - host: www.mcatfg.com
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: webchat      
+            servicePort: 8081
+        - path: /chat
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+ namespace: webchat
+ name: webchatservice
+spec:
+ selector:
+   component: webchatservice
+ clusterIP: None
+ ports:
+ - name: hz-port-name
+   port: 5701
+   protocol: TCP
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webchat
+  namespace: webchat
+  labels:
+    webchatcluster: "true"
+    app: webchat
+    type: LoadBalancer
+spec:
+  selector:
+    app: webchat
+  type: LoadBalancer
+  ports:
+    - name: webchat-port
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+    - name: websvc-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+
+---
+
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: webchat-consumer
+  namespace: webchat
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webchat
+  minReplicas: 2
+  maxReplicas: 2
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageUtilization: 1
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webchat
+  namespace: webchat
+spec:
+#  strategy:
+#    type: Recreate
+  selector:
+    matchLabels:
+      app: webchat
+#  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: webchat
+        component: webchatservice
+    spec:
+      containers:
+      - image: mscarceller/webchat:1.0.0
+        imagePullPolicy: Always
+        name: webchat
+        ports:
+          - name: webchat-port
+            containerPort: 8081
+          - name: websvc-port
+            containerPort: 8080
+          - name: hazlecast
+            containerPort: 5701
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+      terminationGracePeriodSeconds: 60
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: webchat
+  labels:
+    app: mongodb
+    type: ClusterIP
+spec:
+  selector:
+    app: mongodb
+  type: ClusterIP
+  ports:
+   - name: mongodb-port
+     protocol: TCP
+     port: 27017
+     targetPort: 27017
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb-deployment
+  namespace: webchat
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - image: mongo:4.2.3-bionic
+        name: mongodb
+        ports:
+        - containerPort: 27017
+        volumeMounts:
+        - name: mongodb-storage
+          mountPath: /data/db
+      volumes:
+      - name: mongodb-storage
+        persistentVolumeClaim:
+          claimName: mongo-pvc
+          
+---
+
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: mongo-pv
+  namespace: webchat
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mongo"
+
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: mongo-pvc
+  namespace: webchat
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
