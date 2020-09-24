@@ -1,51 +1,60 @@
 # Elastic & FaultTolerant GroupChat Application - Vert.x based Application
 
 
----
+## Building and publish the image into DockerHub registry
 
 * Build the image:
 
     ```
-    docker build -t mscarceller/webchat:1.0.0 .
+    > docker build -t mscarceller/webchat:1.0.0 .
     ```
 
 * Push the image to dockerhub
 
     ```
-    docker push mscarceller/webchat:1.0.0
+    > docker push mscarceller/webchat:1.0.0
     ```
 
+---
+
+## Packaging the app for use locally as .jar file
 
 * Package the application:
 
     ```
-    ./mvn clean package
+    > ./mvn clean package
     ```
 
     or
 
     ```
-    mvn clean install
+    > mvn clean install
     ```
+
+---
+## Running the app
 
 * Run the application:
 
     ```
-    mvn exec:java
+    > mvn exec:java
     ```
 
 * Deploy local kubernetes:
 
-kubectl apply -f k8s.yaml
-
+    ```
+    > kubectl apply -f k8s.yaml
+    ```
 
 * Deploy local cluster vert.x:
 
-java -jar target/mca-webchat-vertx-fat.jar -cluster -cp /cluster/
+    ```
+    > java -jar target/mca-webchat-vertx-fat.jar -cluster -cp /cluster/
+    ```
 
+---
 
-
-## kubernetes command help
+## Kubernetes Command help
 
 * linux: 
 
