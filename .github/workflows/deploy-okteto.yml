@@ -29,10 +29,8 @@ jobs:
       with:
         name: ${OKTETO_NAMESPACE}
     
-    - name: "Deploy application"
+    - name: "Create deployment"
       uses: okteto/apply@master
       with:
-        namespace: ${OKTETO_NAMESPACE}
         working-directory: 'EFTGCA-VertxBackend'
         manifest: k8s.yaml
-        
