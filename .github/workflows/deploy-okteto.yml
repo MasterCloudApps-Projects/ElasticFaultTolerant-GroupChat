@@ -24,6 +24,7 @@ jobs:
         uses: okteto/actions/namespace@v1
         id: namespace
         with:
+          working-directory: EFTGCA-VertxBackend
           token: ${{ secrets.OKTETO_TOKEN }}
           namespace: ${OKTETO_NAMESPACE}
 
@@ -32,6 +33,7 @@ jobs:
         env:
           KUBECONFIG: ${{ steps.namespace.outputs.kubeconfig }}  
         with:
+          working-directory: EFTGCA-VertxBackend
           namespace: ${OKTETO_NAMESPACE}
           manifest: k8s.yml
           tag: ${GITHUBREPOSITORY}/${IMAGENAME}:${IMAGETAG}
