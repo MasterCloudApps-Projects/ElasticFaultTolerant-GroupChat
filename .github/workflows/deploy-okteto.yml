@@ -33,6 +33,6 @@ jobs:
       uses: okteto/apply@master
       with:
         namespace: ${OKTETO_NAMESPACE}
-        working-directory: EFTGCA-VertxBackend
+        working-directory: 'EFTGCA-VertxBackend'
         manifest: k8s.yaml
         
