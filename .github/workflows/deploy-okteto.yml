@@ -32,4 +32,4 @@ jobs:
     - name: "Create deployment"
       uses: okteto/apply@master
       with:
-        manifest: EFTGCA-VertxBackend/k8s.yaml
+        manifest: "./EFTGCA-VertxBackend/k8s.yaml"
