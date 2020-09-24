@@ -6,11 +6,12 @@ on:
       - master
      paths:
       - 'EFTGCA-VertxBackend/**'
+      - '.github/workflows/docker-publish-backend-vertx.yml'
 env:
   # TODO: Change variable to your image's name.
-  GITHUB_REPOSITORY: mscarceller
-  IMAGE_NAME: webchat
-  IMAGE_TAG: '1.0.0'
+  GITHUBREPOSITORY: mscarceller
+  IMAGENAME: webchat
+  IMAGETAG: '1.0.0'
 
 jobs:
   build:
@@ -28,12 +29,12 @@ jobs:
 
       - name: Build image
         if: success()
-        run: docker build -t ${GITHUB_REPOSITORY}:${IMAGE_TAG} .
+        run: docker build -t ${GITHUBREPOSITORY}:${IMAGETAG} .
         working-directory: EFTGCA-VertxBackend
 
       - name: Push to docker registry
         if: success()
         uses: actions-hub/docker@master
         with:
-          args: push ${GITHUB_REPOSITORY}:${IMAGE_TAG}
+          args: push ${GITHUBREPOSITORY}:${IMAGETAG}
           working-directory: EFTGCA-VertxBackend
