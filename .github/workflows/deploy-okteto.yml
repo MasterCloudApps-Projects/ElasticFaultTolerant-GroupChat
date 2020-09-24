@@ -33,7 +33,6 @@ jobs:
         env:
           KUBECONFIG: ${{ steps.namespace.outputs.kubeconfig }}  
         with:
-          working-directory: EFTGCA-VertxBackend
           namespace: ${OKTETO_NAMESPACE}
           manifest: k8s.yml
           tag: ${GITHUBREPOSITORY}/${IMAGENAME}:${IMAGETAG}
