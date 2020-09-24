@@ -10,7 +10,7 @@ public class Notification{
     private String method;
     private JsonNode params;
 
-    public Notificacion(String method, JsonNode params) {
+    public Notification(String method, JsonNode params) {
         this.jsonrpc = VERSION;
         this.method = method;
         this.params = params;
