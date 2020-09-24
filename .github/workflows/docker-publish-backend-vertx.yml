@@ -1,0 +1,36 @@
+name: Deploy to docker hub
+
+on:
+   push:
+     branches:    
+      - master
+     paths:
+      - 'EFTGCA-VertxBackend/**'
+env:
+  # TODO: Change variable to your image's name.
+  GITHUB_REPOSITORY: mscarceller/webchat
+  IMAGE_TAG: 1.0.0
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Login to docker hub
+        if: success()
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build image
+        if: success()
+        run: docker build -t ${GITHUB_REPOSITORY}:${IMAGE_TAG} .
+
+      - name: Push to docker registry
+        if: success()
+        uses: actions-hub/docker@master
+        with:
+          args: push ${GITHUB_REPOSITORY}:${IMAGE_TAG}
