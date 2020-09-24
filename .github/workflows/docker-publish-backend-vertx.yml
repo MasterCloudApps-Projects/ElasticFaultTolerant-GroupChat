@@ -8,8 +8,9 @@ on:
       - 'EFTGCA-VertxBackend/**'
 env:
   # TODO: Change variable to your image's name.
-  GITHUB_REPOSITORY: mscarceller/webchat
-  IMAGE_TAG: 1.0.0
+  GITHUB_REPOSITORY: mscarceller
+  IMAGE_NAME: webchat
+  IMAGE_TAG: '1.0.0'
 
 jobs:
   build:
@@ -28,9 +29,11 @@ jobs:
       - name: Build image
         if: success()
         run: docker build -t ${GITHUB_REPOSITORY}:${IMAGE_TAG} .
+        working-directory: EFTGCA-VertxBackend
 
       - name: Push to docker registry
         if: success()
         uses: actions-hub/docker@master
         with:
           args: push ${GITHUB_REPOSITORY}:${IMAGE_TAG}
+          working-directory: EFTGCA-VertxBackend
