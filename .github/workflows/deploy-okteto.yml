@@ -18,13 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-      - uses: actions/checkout@master
-
+        
       - name: Get Kubeconfig
         uses: okteto/actions/namespace@v1
         id: namespace
         with:
-          working-directory: EFTGCA-VertxBackend
           token: ${{ secrets.OKTETO_TOKEN }}
           namespace: ${OKTETO_NAMESPACE}
 
@@ -34,7 +32,7 @@ jobs:
           KUBECONFIG: ${{ steps.namespace.outputs.kubeconfig }}  
         with:
           namespace: ${OKTETO_NAMESPACE}
-          manifest: k8s.yml
+          manifest: EFTGCA-VertxBackend/k8s.yml
           tag: ${GITHUBREPOSITORY}/${IMAGENAME}:${IMAGETAG}
           waitOn: deployment/webchat
 
