@@ -58,8 +58,12 @@ public class WebChatServer extends AbstractVerticle {
         webChatClients = hz.getMap("users");
 
         // Setting and init shared mongo DB
-        // JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://mongodb:27017").put("db_name","webchat");
-        JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://localhost:27017").put("db_name","webchat");
+        // JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://localhost:27017").put("db_name","webchat");
+        JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://mongodb:27017")
+                                    .put("db_name","webchat")
+                                    .put("username","admin")
+                                    .put("password","password")
+                                    .put("authSource","admin");
         mongoDBclient = MongoClient.createShared(vertx, mongoconfig, "WebchatDBPool");
 
         System.out.println("Server is started");
