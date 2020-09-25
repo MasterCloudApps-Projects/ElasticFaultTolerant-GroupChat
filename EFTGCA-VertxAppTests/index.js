@@ -1,6 +1,6 @@
 var ChatMessagesManager = require('efga-messages');
 
-const url = 'ws://localhost:8080/chat';
+const url = 'wss://webchat-mscarceller.cloud.okteto.net/chat';
 const TEST_USERNAME = "UserName ";
 const TEST_ROOMNAME = "Tests Room";
 const TEST_TEXT_MESSAGE = "Message text number";

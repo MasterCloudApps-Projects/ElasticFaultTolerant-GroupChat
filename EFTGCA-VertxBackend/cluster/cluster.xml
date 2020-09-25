@@ -34,7 +34,7 @@
                         <!-- configure discovery headless service  lookup -->
                         <!--property name="service-label-name">webchatcluster</property-->
                         <!--property name="service-label-value">true</property-->
-                        <property name="service-dns">webchatservice.webchat.svc.cluster.local</property>
+                        <property name="service-dns">webchatservice.mscarceller.svc.cluster.local</property>
                     </properties>
                 </discovery-strategy>
             </discovery-strategies>
