@@ -4,9 +4,7 @@ on:
    push:
      branches:    
       - master
-     paths:
-      - 'EFTGCA-VertxBackend/**'
-      - '.github/workflows/deploy-okteto.yml'
+      
 env:
   OKTETO_NAMESPACE: 'mscarceller'
   GITHUBREPOSITORY: 'mscarceller'
@@ -29,7 +27,9 @@ jobs:
       with:
         name: ${OKTETO_NAMESPACE}
     
-    - name: "Create deployment"
+    - uses: actions/checkout@master
+    
+    - name: "Deploy Full application"
       uses: okteto/apply@master
       with:
-        manifest: EFTGCA-VertxBackend
+        manifest: okteto/deployment.yaml
