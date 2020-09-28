@@ -10,7 +10,7 @@ import { ViewEncapsulation } from "@angular/core";
 
 const SERVICE_NAME: string = 'SocketService';
 //const CHAT_URL = "ws://"+location.hostname+":8080/chat";
-const CHAT_URL = "ws://webchat-mscarceller.cloud.okteto.net/chat";
+const CHAT_URL = "wss://webchat-mscarceller.cloud.okteto.net/chat";
 //const CHAT_URL = "ws://"+location.hostname+"/chat";        //ingress redirect to /chat
 
 @Component({
