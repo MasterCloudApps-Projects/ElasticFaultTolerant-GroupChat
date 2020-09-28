@@ -1,4 +1,4 @@
-name: Deploy on Okteto
+name: Deploy FullApp on Okteto
 
 on:
    push:

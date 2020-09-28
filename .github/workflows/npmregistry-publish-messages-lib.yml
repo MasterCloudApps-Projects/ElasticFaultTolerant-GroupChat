@@ -1,4 +1,5 @@
-name: Node.js Package
+name: Publish Messages library in NPM Registry
+
 on:
   push:
     branches:
