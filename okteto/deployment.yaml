@@ -154,12 +154,9 @@ metadata:
   name: webchat
   namespace: mscarceller
 spec:
-#  strategy:
-#    type: Recreate
   selector:
     matchLabels:
       app: webchat
-#  replicas: 2
   template:
     metadata:
       labels:
