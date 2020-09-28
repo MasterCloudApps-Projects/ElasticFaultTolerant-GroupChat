@@ -6,7 +6,8 @@ on:
       - master
      paths:
       - 'EFTGCA-VertxBackend/**'
-      - '.github/workflows/docker-publish-backend-vertx.yml'
+      - 'EFTGCA-VertxBackend/README.md'
+      - '.github/workflows/dockerhub-publish-backend-vertx.yml'
 env:
   # TODO: Change variable to your image's name.
   GITHUBREPOSITORY: 'mscarceller'

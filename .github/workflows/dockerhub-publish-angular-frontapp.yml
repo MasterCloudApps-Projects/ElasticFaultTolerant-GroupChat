@@ -6,7 +6,8 @@ on:
       - master
      paths:
       - 'EFTGCA-Front/**'
-      - '.github/workflows/publish-frontapp-image.yml'
+      - '!EFTGCA-Front/README.md'
+      - '.github/workflows/dockerhub-publish-angular-frontapp.yml'
 
 env:
   # TODO: Change variable to your image's name.
