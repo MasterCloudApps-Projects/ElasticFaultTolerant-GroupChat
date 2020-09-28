@@ -35,4 +35,4 @@ jobs:
     - name: "Deploy Full application"
       uses: okteto/apply@master
       with:
-        manifest: okteto/deployment.yaml
+        manifest: manifests/okteto.yaml
