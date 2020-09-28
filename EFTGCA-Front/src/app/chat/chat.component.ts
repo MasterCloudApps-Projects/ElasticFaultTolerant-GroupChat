@@ -8,10 +8,9 @@ import { WebSocketSubject, WebSocketSubjectConfig } from 'rxjs/webSocket';
 import { ScrollPanel } from 'primeng/scrollpanel';
 import { ViewEncapsulation } from "@angular/core";
 
+import { environment } from '../../environments/environment';
+
 const SERVICE_NAME: string = 'SocketService';
-//const CHAT_URL = "ws://"+location.hostname+":8080/chat";
-const CHAT_URL = "wss://webchat-mscarceller.cloud.okteto.net/chat";
-//const CHAT_URL = "ws://"+location.hostname+"/chat";        //ingress redirect to /chat
 
 @Component({
   selector: 'app-chat',
@@ -198,7 +197,7 @@ export class ChatComponent implements OnInit {
     }
 
     private configSocket(): void {
-      const url: string   = CHAT_URL;
+      const url: string   = environment.CHAT_URL;
       this.config = {
         url,
         openObserver: { next: (event: Event) => { this.onOpenConnection(event); } },
