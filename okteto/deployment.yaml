@@ -63,7 +63,9 @@ spec:
           - key: MONGO_ROOT_PASSWORD
             path: admin/MONGO_ROOT_PASSWORD
             mode: 0444
+
 ---
+
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -189,11 +191,11 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: webchatfront
+      app: webchat
   template:
     metadata:
       labels:
-        app: webchatfront
+        app: webchat
     spec:
       containers:
         - name: webchatfront
