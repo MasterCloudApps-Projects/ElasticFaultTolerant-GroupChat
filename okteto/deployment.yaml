@@ -117,7 +117,7 @@ spec:
     app: webchat
   type: LoadBalancer
   ports:
-    - name: webchat-port
+    - name: webchatfront-port
       protocol: TCP
       port: 8081
       targetPort: 8081
@@ -171,8 +171,6 @@ spec:
         imagePullPolicy: Always
         name: webchat
         ports:
-          - name: webchat-port
-            containerPort: 8081
           - name: websvc-port
             containerPort: 8080
           - name: hazlecast
@@ -183,3 +181,26 @@ spec:
           requests:
             cpu: 200m
       terminationGracePeriodSeconds: 60
+
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webchatfront
+  namespace: mscarceller
+spec:
+  selector:
+    matchLabels:
+      app: webchatfront
+  template:
+    metadata:
+      labels:
+        app: webchatfront
+    spec:
+      containers:
+        - name: webchatfront
+          image: mscarceller/eftgca-front:0.1.0
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8081
