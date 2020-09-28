@@ -1,0 +1,40 @@
+name: Deploy Front App to docker hub
+
+on:
+   push:
+     branches:    
+      - master
+     paths:
+      - 'EFTGCA-Front/**'
+      - '.github/workflows/publish-frontapp-image.yml'
+env:
+  # TODO: Change variable to your image's name.
+  GITHUBREPOSITORY: 'mscarceller'
+  IMAGENAME: 'eftgca-front'
+  IMAGETAG: '0.1.0'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@master
+
+      - name: Login to docker hub
+        if: success()
+        uses: actions-hub/docker/login@master
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build image
+        if: success()
+        run: docker build -t ${GITHUBREPOSITORY}/${IMAGENAME}:${IMAGETAG} .
+        working-directory: EFTGCA-Front
+
+      - name: Push to docker registry
+        if: success()
+        uses: actions-hub/docker@master
+        with:
+          args: push ${GITHUBREPOSITORY}/${IMAGENAME}:${IMAGETAG}
+          working-directory: EFTGCA-Front    
