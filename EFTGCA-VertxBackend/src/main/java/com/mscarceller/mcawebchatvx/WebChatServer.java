@@ -171,7 +171,7 @@ public class WebChatServer extends AbstractVerticle {
             SuccessResponse successResponse = new SuccessResponse("\"OK\"",messageId);
             serverWebSocket.writeFinalTextFrame(successResponse.toString());
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.createObjectNode().put("type", "system").put("text",userName + " has joined the room!").put("room", roomName);
+            JsonNode jsonNode = objectMapper.createObjectNode().put("type", "system").put("text",userName + " has joined the room!").put("roomName", roomName);
             Notification newUserNotification = new Notification("newUser", jsonNode);
             if(!isReconnect){
                 vertx.eventBus().publish(roomName, newUserNotification.toString());
