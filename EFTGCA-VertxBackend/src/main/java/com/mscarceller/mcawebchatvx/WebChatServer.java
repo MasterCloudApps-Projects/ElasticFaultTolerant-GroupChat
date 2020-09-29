@@ -250,7 +250,7 @@ public class WebChatServer extends AbstractVerticle {
 
     private void sendLastMessagesInRoom(String roomName, ServerWebSocket serverWebSocket){
         System.out.println("Sending last messages for the new user in room!");
-        JsonObject query = new JsonObject().put("params.room", roomName);
+        JsonObject query = new JsonObject().put("params.roomName", roomName);
         FindOptions options = new FindOptions();
         options.setLimit(30);
         mongoDBclient.findWithOptions("messages", query, options, res -> {
