@@ -178,7 +178,7 @@ public class WebChatServer extends AbstractVerticle {
             sendLastMessagesInRoom(roomName, serverWebSocket);
         }
         else{
-            ErrorResponse errorResponse = new ErrorResponse(ErrorCode.USERID_EXIST, messageId);
+            ErrorResponse errorResponse = new ErrorResponse(ErrorCode.USER_EXIST, messageId);
             serverWebSocket.writeFinalTextFrame(errorResponse.toString());
             System.out.println("Error registering user...");
         }
