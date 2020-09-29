@@ -129,8 +129,8 @@ export class ChatComponent implements OnInit {
             "params": {
               sessionId: this.sessionId,
               userId: this.userId,
-              room: this.roomName,
-              user: this.userName,
+              roomName: this.roomName,
+              userName: this.userName,
             },
             "id": this.messageId
       }
@@ -333,8 +333,8 @@ export class ChatComponent implements OnInit {
         "method": "textMessage",
         "params": {
           userId: this.userId,
-          room: this.roomName,
-          user: this.userName,
+          roomName: this.roomName,
+          userName: this.userName,
           text: this.messageText,
           type: "sent",
           ack: false,
