@@ -98,6 +98,7 @@ export class ChatComponent implements OnInit {
 
     checkUserName(){
       if (this.userName!=""){
+        this.userId = this.userName;
         this.registerUser();
       }
       else
