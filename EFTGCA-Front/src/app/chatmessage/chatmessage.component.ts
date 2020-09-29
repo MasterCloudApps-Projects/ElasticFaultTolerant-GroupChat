@@ -9,7 +9,7 @@ export class ChatmessageComponent implements OnInit {
 
   @Input() type: string;
   @Input() ack: boolean;
-  @Input() user: string;
+  @Input() userName: string;
   @Input() text: string;
   @Input() date: Date;
 
