@@ -12,16 +12,26 @@ public class WebChatClient extends AbstractVerticle {
 
     MessageConsumer<Object> handler;
 
+    private String id;
     private String room;
     private String name;
     private String sessionId;
     private ServerWebSocket serverWebSocket;
 
-	public WebChatClient(String room, String name, ServerWebSocket serverWebSocket) {
+	public WebChatClient(String room, String id, String name, ServerWebSocket serverWebSocket) {
+        this.id = id;
         this.room = room;
         this.name = name;
         this.serverWebSocket = serverWebSocket;
         this.sessionId = UUID.randomUUID().toString();
+    }
+
+    public String getId(){
+        return id;
+    }
+
+    public String getName(){
+        return name;
     }
 
     public String getSessionId(){
@@ -46,7 +56,7 @@ public class WebChatClient extends AbstractVerticle {
             }catch(IllegalStateException e){
                 // The user is offline, so I delete it.
                 this.handler.unregister();
-                vertx.eventBus().publish("delete.user", this.name);
+                vertx.eventBus().publish("delete.user", "{\"roomName\":\""+this.room+"\",\"userId\":\""+this.id+"\"}");
                // serverWebSocket.close();
             } 
         });

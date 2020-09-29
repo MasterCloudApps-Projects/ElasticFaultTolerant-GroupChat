@@ -1,8 +1,10 @@
 package com.mscarceller.mcawebchatvx;
 
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
+import java.util.Iterator;
 
 import java.util.concurrent.TimeUnit;
 
@@ -34,7 +36,7 @@ import io.vertx.ext.mongo.FindOptions;
 
 public class WebChatServer extends AbstractVerticle {
 
-    private Map<String, String> webChatClients;
+    private Map<String, String> webChatClients;  // clients <roomName,<userid, client>>
     private MongoClient mongoDBclient;
     private HttpServer server;
     private MessageHandler messageHandler;
@@ -64,6 +66,7 @@ public class WebChatServer extends AbstractVerticle {
                                     .put("username","admin")
                                     .put("password","password")
                                     .put("authSource","admin");
+        
         mongoDBclient = MongoClient.createShared(vertx, mongoconfig, "WebchatDBPool");
 
         System.out.println("Server is started");
@@ -85,27 +88,17 @@ public class WebChatServer extends AbstractVerticle {
                         int i = 1;
                         switch (messageHandler.getMethod(data.toString())){
                             case JOIN_ROOM:
-                                registerNewUserInRoom(message.getInteger("id"), message.getJsonObject("params").getString("room"), message.getJsonObject("params").getString("user"), serverWebSocket);
+                                registerNewUserInRoom(message, serverWebSocket);
                             break;
                             case RECONNECT:
-                                // If reconnect message first check if the user is already registered, and if so
-                                // delete it and register again. It comes from failured pod or broken connection.
-                                System.out.println("Searching for client: " + message.getJsonObject("params") +" to reconnect...");                        
-                                if (webChatClients.containsKey(message.getJsonObject("params").getString("user"))) {
-                                    System.out.println("Reconnecting user: " + message.getJsonObject("params"));
-                                    deleteUser(message.getJsonObject("params").getString("user"));
-                                    newClient(message.getJsonObject("params").getString("room"), message.getJsonObject("params").getString("user"), serverWebSocket);
-                                }
-                                else{
-                                    System.out.println("The user " + message.getJsonObject("params") + " is not registered yet, so registering...");
-                                    newClient(message.getJsonObject("params").getString("room"), message.getJsonObject("params").getString("user"), serverWebSocket);
-                                }
+                                System.out.println("Reconnecting user: " + message.getJsonObject("params"));
+                                registerNewUserInRoom(message, serverWebSocket);
                             break;
                             case TEXT_MESSAGE:
-                                // If message push it into the event bus, into the specific room
+                                // If message, push it into the event bus, into the specific room
                                 System.out.println("Publishing message into the event bus: " + message.toString());
                                 persistMessageToDB(message);
-                                vertx.eventBus().publish(message.getJsonObject("params").getString("room"), message);
+                                vertx.eventBus().publish(message.getJsonObject("params").getString("roomName"), message);
                                 System.out.println("Message in event bus: " + message.toString());
                             break;
                             default:
@@ -127,7 +120,9 @@ public class WebChatServer extends AbstractVerticle {
 
             // Listen for disconected users event
             vertx.eventBus().consumer("delete.user", data -> {
-                this.deleteUser(data.body().toString());
+                JsonObject userData = new JsonObject(data.body().toString());
+                System.out.println("Someone has notified for deleting user: <" + userData.getString("roomName") + ", " + userData.getString("userId")+">");
+                this.deleteClient(userData.getString("roomName"),userData.getString("userId"));
             });
 
             // Listen for reconnect users of a destroyed pod
@@ -155,41 +150,86 @@ public class WebChatServer extends AbstractVerticle {
 
     }
 
-    private void registerNewUserInRoom(int messageId, String room, String user, ServerWebSocket serverWebSocket){
+    private void registerNewUserInRoom(JsonObject message, ServerWebSocket serverWebSocket){
         // If the user is new register it into the room and notify using the Event Bus that is a new user in room.
         // Also send the last messages in room
-        if (!isUserRegistered(room, user)) {
-            newClient(room, user, serverWebSocket);
+
+        System.out.println("User register...");
+
+        String userId = message.getJsonObject("params").getString("userId");
+        String roomName = message.getJsonObject("params").getString("roomName");
+        String userName = message.getJsonObject("params").getString("userName");
+
+        if (isUserRegisteredInRoom(roomName, userId)){
+            System.out.println("User is already register: delete and register again");
+            deleteClient(roomName, userId);
+        }
+
+        if (!isAnotherUserWithSameNameInRoom(roomName, userName)) {
+            System.out.println("No user in room with same Name");
+            newClient(roomName, userId, userName, serverWebSocket);
             SuccessResponse successResponse = new SuccessResponse("\"OK\"",messageId);
             serverWebSocket.writeFinalTextFrame(successResponse.toString());
             ObjectMapper objectMapper = new ObjectMapper();
-            JsonNode jsonNode = objectMapper.createObjectNode().put("type", "system").put("text",user + " has joined the room!").put("room", room);
+            JsonNode jsonNode = objectMapper.createObjectNode().put("type", "system").put("text",userName + " has joined the room!").put("room", roomName);
             Notification newUserNotification = new Notification("newUser", jsonNode);
-            vertx.eventBus().publish(room, newUserNotification.toString());
+            vertx.eventBus().publish(roomName, newUserNotification.toString());
             System.out.println("Notify the new user in EventBus:" + newUserNotification.toString());
-            sendLastMessagesInRoom(room, serverWebSocket);
+            sendLastMessagesInRoom(roomName, serverWebSocket);
         }
-        // If other user is already registered with same name send error message, but using the websocket.
         else{
-            ErrorResponse errorResponse = new ErrorResponse(ErrorCode.USER_EXIST, messageId);
+            ErrorResponse errorResponse = new ErrorResponse(ErrorCode.USERID_EXIST, messageId);
             serverWebSocket.writeFinalTextFrame(errorResponse.toString());
             System.out.println("Error registering user...");
         }
     }
 
-    private void newClient(String room, String user, ServerWebSocket ws){
-        WebChatClient webChatClient = new WebChatClient(room, user, ws);
+    private void newClient(String roomName, String userId, String userName, ServerWebSocket ws){
+        WebChatClient webChatClient = new WebChatClient(roomName, userId, userName, ws);
         vertx.deployVerticle(webChatClient, new DeploymentOptions().setHa(true), res -> {
             if (res.succeeded()) {
-                webChatClients.put(user, res.result());
+                insertUserIntoRoom(roomName, userId, userName, res.result());
             } else {
                 System.err.println("Error at deploy User");
             }
         });
     }
 
-    private boolean isUserRegistered(String room, String userName){
-        return webChatClients.containsKey(userName);
+    private void insertUserIntoRoom(String roomName, String userId, String userName, String vertxId){
+        System.out.println("Inserting user " + userId + " in room " + roomName);
+        JsonObject usersInRoom = getUsersInRoomJsonObject(roomName);
+        JsonObject userData = new JsonObject();
+        userData.put("userName", userName);
+        userData.put("vertxId", vertxId);
+        usersInRoom.put(userId, userData);
+        webChatClients.put(roomName, usersInRoom.toString());
+    }
+
+
+    private boolean isUserRegisteredInRoom(String roomName, String userId){
+        System.out.println("Checking userId " + userId + " in room " + roomName);
+        JsonObject usersInRoom = getUsersInRoomJsonObject(roomName);
+        return usersInRoom.containsKey(userId);
+    }
+
+    private JsonObject getUsersInRoomJsonObject(String roomName){
+        String usersInRoomString = webChatClients.get(roomName);
+        if (usersInRoomString!=null){
+            return (new JsonObject(usersInRoomString));
+        }
+        else{
+            return new JsonObject();
+        }
+    }
+
+    private boolean isAnotherUserWithSameNameInRoom(String roomName, String userName){
+        System.out.println("Checking userName " + userName + " in room " + roomName);
+        JsonObject usersInRoom = getUsersInRoomJsonObject(roomName);
+        Iterator<Map.Entry<String, Object>> iter = usersInRoom.iterator();
+        while (iter.hasNext()) {
+            if(new JsonObject(iter.next().getValue().toString()).getString("userName").equals(userName)){ return true;}  
+        }
+        return false;
     }
 
     private int getNewId(){
@@ -223,15 +263,22 @@ public class WebChatServer extends AbstractVerticle {
     }
 
     //Remove the verticle and unregister the handler
-    private void deleteUser (String user_name){
-        vertx.undeploy(webChatClients.get(user_name), res -> {
-            if (res.succeeded()) {
-                System.out.println("Undeployed ok");
-            } else {
-                System.err.println("Undeploy failed!");
-            }
-        });
-        webChatClients.remove(user_name);
+    private void deleteClient (String roomName, String userId){
+        JsonObject usersInRoom = getUsersInRoomJsonObject(roomName);
+        System.out.println("Deleting client: " + usersInRoom.getJsonObject(userId).getString("vertxId"));
+        try {
+            vertx.undeploy(usersInRoom.getJsonObject(userId).getString("vertxId"), res -> {
+                if (res.succeeded()) {
+                    System.out.println("Undeployed ok");
+                } else {
+                    System.err.println("Undeploy failed!");
+                }
+            });
+        } catch (java.lang.NullPointerException e) {
+            System.err.println("Undeploy failed!");
+        }
+        usersInRoom.remove(userId);
+        webChatClients.put(roomName, usersInRoom.toString());
     }
 
     public void sleepServer(int seconds){
