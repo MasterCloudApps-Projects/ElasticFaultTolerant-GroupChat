@@ -31,6 +31,7 @@ export class ChatComponent implements OnInit {
   private reconnectInterval: number = 5000;
   private reconnectAttempts: number = 20;
 
+  userId:string   = "User.1@user.com";
   roomName:string = "Room 1";
   userName:string = "User 1";
   
@@ -108,8 +109,9 @@ export class ChatComponent implements OnInit {
             "jsonrpc": "2.0",
             "method": "joinRoom",
             "params": {
-              room: this.roomName,
-              user: this.userName,
+              userId: this.userId,
+              roomName: this.roomName,
+              userName: this.userName,
             },
             "id": this.messageId
       }
@@ -125,6 +127,7 @@ export class ChatComponent implements OnInit {
             "method": "reconnect",
             "params": {
               sessionId: this.sessionId,
+              userId: this.userId,
               room: this.roomName,
               user: this.userName,
             },
@@ -328,6 +331,7 @@ export class ChatComponent implements OnInit {
         "jsonrpc": "2.0",
         "method": "textMessage",
         "params": {
+          userId: this.userId,
           room: this.roomName,
           user: this.userName,
           text: this.messageText,
