@@ -6,7 +6,7 @@
 
         <p-scrollPanel  #scrollChatContainer (ngChange)="scrollToBottom()" [style]="{width: '100%', height: '400px','background-color':'#fff7e6'}">
             <app-chatmessage *ngFor="let message of chatmessages | keyvalue: asIsOrder" 
-                [user]="(message.value.params.type!='sent') ? message.value.params.user : ''"
+                [userName]="(message.value.params.type!='sent') ? message.value.params.useName : ''"
                 [text]="message.value.params.text"
                 [date]="message.value.params.date"
                 [type]="message.value.params.type"
