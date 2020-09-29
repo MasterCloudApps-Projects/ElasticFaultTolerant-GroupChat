@@ -118,3 +118,6 @@ EFTGCA-VertxAppTests/node_modules/ws/lib/validation.js
 EFTGCA-VertxAppTests/node_modules/ws/lib/websocket-server.js
 EFTGCA-VertxAppTests/node_modules/ws/lib/websocket.js
 .gitignore
+EFTGCA-VertxAppTests/node_modules/eftgca-messages/index.js
+EFTGCA-VertxAppTests/node_modules/eftgca-messages/package.json
+EFTGCA-VertxAppTests/node_modules/eftgca-messages/README.md
