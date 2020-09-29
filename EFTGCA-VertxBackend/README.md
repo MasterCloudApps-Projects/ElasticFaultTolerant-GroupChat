@@ -22,7 +22,7 @@
 * Package the application:
 
     ```
-    > ./mvn clean package
+    > mvn clean package
     ```
 
     or
