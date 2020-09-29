@@ -299,7 +299,7 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      if (message.params.room != this.roomName){
+      if (message.params.roomName != this.roomName){
         return;
       }
 
@@ -309,7 +309,7 @@ export class ChatComponent implements OnInit {
       }
 
       // if is my message set it like received and delete form pending list
-      if(message.params.user == this.userName){
+      if(message.params.userName == this.userName){
           message.params.ack = true;
           this.pendingmessages.delete(message.params.uuid);
       }
