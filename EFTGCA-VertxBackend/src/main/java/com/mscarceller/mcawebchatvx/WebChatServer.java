@@ -88,11 +88,11 @@ public class WebChatServer extends AbstractVerticle {
                         int i = 1;
                         switch (messageHandler.getMethod(data.toString())){
                             case JOIN_ROOM:
-                                registerNewUserInRoom(message, serverWebSocket);
+                                registerNewUserInRoom(message, serverWebSocket, false);
                             break;
                             case RECONNECT:
                                 System.out.println("Reconnecting user: " + message.getJsonObject("params"));
-                                registerNewUserInRoom(message, serverWebSocket);
+                                registerNewUserInRoom(message, serverWebSocket, true);
                             break;
                             case TEXT_MESSAGE:
                                 // If message, push it into the event bus, into the specific room
@@ -150,7 +150,7 @@ public class WebChatServer extends AbstractVerticle {
 
     }
 
-    private void registerNewUserInRoom(JsonObject message, ServerWebSocket serverWebSocket){
+    private void registerNewUserInRoom(JsonObject message, ServerWebSocket serverWebSocket, boolean isReconnect){
         // If the user is new register it into the room and notify using the Event Bus that is a new user in room.
         // Also send the last messages in room
 
@@ -173,8 +173,10 @@ public class WebChatServer extends AbstractVerticle {
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.createObjectNode().put("type", "system").put("text",userName + " has joined the room!").put("room", roomName);
             Notification newUserNotification = new Notification("newUser", jsonNode);
-            vertx.eventBus().publish(roomName, newUserNotification.toString());
-            System.out.println("Notify the new user in EventBus:" + newUserNotification.toString());
+            if(!isReconnect){
+                vertx.eventBus().publish(roomName, newUserNotification.toString());
+                System.out.println("Notify the new user in EventBus:" + newUserNotification.toString());
+            }
             sendLastMessagesInRoom(roomName, serverWebSocket);
         }
         else{
