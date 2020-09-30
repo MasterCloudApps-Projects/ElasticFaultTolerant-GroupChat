@@ -1,6 +1,6 @@
 {
-  "name": "efga-messages",
-  "version": "1.0.4",
+  "name": "eftgca-messages",
+  "version": "2.0.1",
   "description": "Javascript library for ElasticFaultTolerant-GroupChat",
   "main": "index.js",
   "scripts": {

@@ -31,6 +31,7 @@ export class ChatComponent implements OnInit {
   private reconnectInterval: number = 5000;
   private reconnectAttempts: number = 20;
 
+  userId:string   = "User.1@user.com";
   roomName:string = "Room 1";
   userName:string = "User 1";
   
@@ -97,6 +98,7 @@ export class ChatComponent implements OnInit {
 
     checkUserName(){
       if (this.userName!=""){
+        this.userId = this.userName;
         this.registerUser();
       }
       else
@@ -108,8 +110,9 @@ export class ChatComponent implements OnInit {
             "jsonrpc": "2.0",
             "method": "joinRoom",
             "params": {
-              room: this.roomName,
-              user: this.userName,
+              userId: this.userId,
+              roomName: this.roomName,
+              userName: this.userName,
             },
             "id": this.messageId
       }
@@ -125,8 +128,9 @@ export class ChatComponent implements OnInit {
             "method": "reconnect",
             "params": {
               sessionId: this.sessionId,
-              room: this.roomName,
-              user: this.userName,
+              userId: this.userId,
+              roomName: this.roomName,
+              userName: this.userName,
             },
             "id": this.messageId
       }
@@ -295,7 +299,7 @@ export class ChatComponent implements OnInit {
         return;
       }
 
-      if (message.params.room != this.roomName){
+      if (message.params.roomName != this.roomName){
         return;
       }
 
@@ -305,7 +309,7 @@ export class ChatComponent implements OnInit {
       }
 
       // if is my message set it like received and delete form pending list
-      if(message.params.user == this.userName){
+      if(message.params.userName == this.userName){
           message.params.ack = true;
           this.pendingmessages.delete(message.params.uuid);
       }
@@ -328,8 +332,9 @@ export class ChatComponent implements OnInit {
         "jsonrpc": "2.0",
         "method": "textMessage",
         "params": {
-          room: this.roomName,
-          user: this.userName,
+          userId: this.userId,
+          roomName: this.roomName,
+          userName: this.userName,
           text: this.messageText,
           type: "sent",
           ack: false,

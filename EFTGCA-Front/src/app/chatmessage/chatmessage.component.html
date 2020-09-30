@@ -4,7 +4,7 @@
 </div>
 
 <div *ngIf="!isSystemMessage()" class="message {{type}}">
-    <p-card subheader="{{user}}" [style]="{'width': '100%', 'background-color':getColor()}" styleClass="ui-card-shadow">
+    <p-card subheader="{{userName}}" [style]="{'width': '100%', 'background-color':getColor()}" styleClass="ui-card-shadow">
         <div>{{text}}</div>
         <p-footer>
             <div style="text-align: right;">

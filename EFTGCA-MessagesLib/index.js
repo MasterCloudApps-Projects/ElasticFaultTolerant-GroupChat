@@ -141,41 +141,44 @@ class ChatMessagesManager extends EventEmitter {
         return this.messageId++;
     }
 
-    joinUser(userName,roomName){
+    joinUser(userId, userName, roomName){
         let joinMessage = { 
             jsonrpc: JSONRPC_VERSION,
             method: METHOD_JOIN_ROOM,
             params: {
-                room: roomName,
-                user: userName,
+                userId: userId,
+                roomName: roomName,
+                userName: userName,
             },
             id: this.getNewId()
         }
         this.writeMessageIntoWebSocket(JSON.stringify(joinMessage));
     }
 
-    reconnectUser(userName,roomName,sessionId){
+    reconnectUser(userId, userName, roomName, sessionId){
         let reconnectMessage = {
               jsonrpc: JSONRPC_VERSION,
               method: METHOD_RECONNECT,
               params: {
                 sessionId: sessionId,
-                room: roomName,
-                user: userName,
+                userId: userId, 
+                roomName: roomName,
+                userName: userName,
               },
               id: this.getNewId()
         }
         this.writeMessageIntoWebSocket(JSON.stringify(reconnectMessage));
     }
 
-    sendTextMessage(roomName, userName, messageText){
+    sendTextMessage(roomName, userId, userName, messageText){
         let messageUUID = uuid.v4();
         let textMessage = { 
             jsonrpc: JSONRPC_VERSION,
             method: METHOD_TEXT_MESSAGE,
             params: {
-                room: roomName,
-                user: userName,
+                userId: userId,
+                roomName: roomName,
+                userName: userName,
                 text: messageText,
                 ack: false,
                 uuid: messageUUID,

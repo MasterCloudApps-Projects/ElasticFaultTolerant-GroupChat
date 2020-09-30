@@ -1,6 +1,8 @@
-var ChatMessagesManager = require('efga-messages');
+var ChatMessagesManager = require('eftgca-messages');
 
 const url = 'wss://webchat-mscarceller.cloud.okteto.net/chat';
+//const url = 'ws://localhost:8080/chat';
+const TEST_USERID = "UserId_";
 const TEST_USERNAME = "UserName ";
 const TEST_ROOMNAME = "Tests Room";
 const TEST_TEXT_MESSAGE = "Message text number";
@@ -18,7 +20,7 @@ function testWithNUsers(usersCount){
 }
 
 function createTestUsers(usersCount){
-    for(let i=1 ; i<usersCount ; i++){
+    for(let i=1 ; i<=usersCount ; i++){
         chatMessagesManagerArray[i] = new ChatMessagesManager(url);
         
         chatMessagesManagerArray[i].on('textMessage',(data) => {
@@ -45,7 +47,7 @@ function createTestUsers(usersCount){
 
 function initTest(usersCount){
     for(let i=1 ; i<usersCount ; i++){
-        chatMessagesManagerArray[i].joinUser(TEST_USERNAME + i, TEST_ROOMNAME);
+        chatMessagesManagerArray[i].joinUser(TEST_USERID + i, TEST_USERNAME + i, TEST_ROOMNAME);
     }
     setTimeout(function() {
         sendMessages(usersCount);
@@ -54,7 +56,7 @@ function initTest(usersCount){
 
 function sendMessages(usersCount){
     for(let i=1 ; i<usersCount ; i++){
-        chatMessagesManagerArray[i].sendTextMessage(TEST_ROOMNAME, TEST_USERNAME + i, TEST_TEXT_MESSAGE + " " + i);
+        chatMessagesManagerArray[i].sendTextMessage(TEST_ROOMNAME, TEST_USERID + i, TEST_USERNAME + i, TEST_TEXT_MESSAGE + " " + i);
     }
     setTimeout(function() {
         checkTestsResult(usersCount);
@@ -62,6 +64,10 @@ function sendMessages(usersCount){
 }
 
 function checkTestsResult(usersCount){
+
+    //Try to insert an user with different Id but same name
+    chatMessagesManagerArray[usersCount].joinUser(TEST_USERID + "0", TEST_USERNAME + "1", TEST_ROOMNAME);
+
     for(let i=1 ; i<usersCount ; i++){
         console.log("************************************");
         console.log("INFO FOR USER: " + TEST_USERNAME + i)
