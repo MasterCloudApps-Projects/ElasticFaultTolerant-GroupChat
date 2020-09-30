@@ -122,7 +122,7 @@ public class WebChatServer extends AbstractVerticle {
             vertx.eventBus().consumer("delete.user", data -> {
                 JsonObject userData = new JsonObject(data.body().toString());
                 System.out.println("Someone has notified for deleting user: <" + userData.getString("roomName") + ", " + userData.getString("userId")+">");
-                this.deleteClient(userData.getString("roomName"),userData.getString("userId"));
+                deleteClient(userData.getString("roomName"),userData.getString("userId"));
             });
 
             // Listen for reconnect users of a destroyed pod
@@ -267,8 +267,8 @@ public class WebChatServer extends AbstractVerticle {
     //Remove the verticle and unregister the handler
     private void deleteClient (String roomName, String userId){
         JsonObject usersInRoom = getUsersInRoomJsonObject(roomName);
-        System.out.println("Deleting client: " + usersInRoom.getJsonObject(userId).getString("vertxId"));
         try {
+            System.out.println("Deleting client: " + usersInRoom.getJsonObject(userId).getString("vertxId"));
             vertx.undeploy(usersInRoom.getJsonObject(userId).getString("vertxId"), res -> {
                 if (res.succeeded()) {
                     System.out.println("Undeployed ok");
@@ -277,7 +277,7 @@ public class WebChatServer extends AbstractVerticle {
                 }
             });
         } catch (java.lang.NullPointerException e) {
-            System.err.println("Undeploy failed!");
+            System.err.println("Client has already been deleted");
         }
         usersInRoom.remove(userId);
         webChatClients.put(roomName, usersInRoom.toString());

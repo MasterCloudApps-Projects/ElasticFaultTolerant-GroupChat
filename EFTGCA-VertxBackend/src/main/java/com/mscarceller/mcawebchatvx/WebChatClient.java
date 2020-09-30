@@ -55,8 +55,8 @@ public class WebChatClient extends AbstractVerticle {
                 System.out.println("Writing to socket: " + "Server response to:" + data.body().toString());
             }catch(IllegalStateException e){
                 // The user is offline, so I delete it.
-                this.handler.unregister();
                 vertx.eventBus().publish("delete.user", "{\"roomName\":\""+this.room+"\",\"userId\":\""+this.id+"\"}");
+                this.handler.unregister();
                // serverWebSocket.close();
             } 
         });
