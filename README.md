@@ -6,7 +6,7 @@ The code is distributed in the following folders:
 
 * [EFTGCA-VertxBackend](EFTGCA-VertxBackend): Elastic & FaultTolerant GroupChat Application based on Vert.x framework.
 
-* [EFTGCA-MessagesLib](EFTGCA-MessagesLib): Javascript library to manage messages added.
+* [EFTGCA-MessagesLib](EFTGCA-MessagesLib): Javascript library to manage messages.
 
 * [EFTGCA-VertxAppTests](EFTGCA-VertxAppTests): Javascript scripts used for vert.x app testing.
 
