@@ -11,3 +11,10 @@ The code is distributed in the following folders:
 * [EFTGCA-VertxAppTests](EFTGCA-VertxAppTests): Javascript scripts used for vert.x app testing.
 
 * [EFTGCA-Front](EFTGCA-Front): Angular frontend app example.
+
+
+## Testing the Application
+
+### Chaos testing with Litmus and Okteto
+
+You can see more detalis [here](./Documentation/ChaosTestingOkteto.md)
