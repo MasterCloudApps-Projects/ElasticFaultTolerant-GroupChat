@@ -1,0 +1,4 @@
+deploy:
+  - helm repo add okteto https://apps.okteto.com && helm repo update
+  - helm upgrade --install litmuschaos okteto/litmuschaos --skip-crds --history-max 1
+  - kubectl apply -f chaos/experiment.yaml

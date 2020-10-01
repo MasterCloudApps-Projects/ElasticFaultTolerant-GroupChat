@@ -1,0 +1,26 @@
+apiVersion: litmuschaos.io/v1alpha1
+kind: ChaosEngine
+metadata:
+  name: pod-killer-chaos
+  namespace: mscarceller
+spec:
+  annotationCheck: 'true'
+  engineState: 'active'
+  appinfo:
+    appns: mscarceller
+    applabel: 'app=webchat'
+    appkind: 'deployment'
+  chaosServiceAccount: default
+  monitoring: false
+  jobCleanUpPolicy: 'delete'
+  experiments:
+    - name: pod-delete
+      spec:
+        components:
+          env:
+            - name: KILL_COUNT
+              value: '1'
+            - name: TOTAL_CHAOS_DURATION
+              value: '300'
+            - name: CHAOS_INTERVAL
+              value: '30'
