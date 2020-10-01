@@ -60,6 +60,6 @@ First of all is to configure your cli tool for developing your applications in O
 
 
 ```
-> kubectl apply -f manifests/experiment.yaml
-> kubectl apply -f manifests/engine.yaml
+> kubectl apply -f k8s/experiment.yaml
+> kubectl apply -f k8s/engine.yaml
 ```
