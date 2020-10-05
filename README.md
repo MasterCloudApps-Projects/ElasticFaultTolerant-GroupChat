@@ -60,7 +60,7 @@ The entry point is a load balancer that distribute the traffic over the availabl
 * ### Reconnection sequence diagram:
 
 <p align="center">
-  <img width="680" src=./Documentation/images/uml_Reconnect.png>
+  <img width="680" src=./Documentation/images/uml_reconnect.png>
 </p>
 
 <a name="deploy"></a>
