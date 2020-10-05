@@ -41,26 +41,35 @@ The entry point is a load balancer that distribute the traffic over the availabl
 
 * ### JoinRoom sequence diagram:
 
-![uml_join](./Documentation/images/uml_joinRoom.png)
+<p align="center">
+  <img width="400" src=./Documentation/images/uml_joinRoom.png>
+</p>
 
 * ### Text Message sequence diagram:
 
-![uml_text](./Documentation/images/uml_sendTextMessage.png)
+<p align="center">
+  <img width="560" src=./Documentation/images/uml_sendTextMessage.png>
+</p>
 
 * ### Error & Retry sequence diagram:
 
-![umlretry](./Documentation/images/uml_retryTextMessage.png)
-
+<p align="center">
+  <img width="560" src=./Documentation/images/uml_retryTextMessage.png>
+</p>
 
 * ### Reconnection sequence diagram:
 
-![umlreconnect](./Documentation/images/uml_Reconnect.png)
+<p align="center">
+  <img width="680" src=./Documentation/images/uml_Reconnect.png>
+</p>
 
+<a name="deploy"></a>
+## 5. Deploy Application
 
 <a name="testing"></a>
-## 4. Testing the Enviroment and Application
+## 5. Testing the Enviroment and Application
 
 <a name="caostesting"></a>
-### 4.1 Chaos testing with Litmus and Okteto
+### 5.1 Chaos testing with Litmus and Okteto
 
 You can see more detalis [here](./Documentation/ChaosTestingOkteto.md)
