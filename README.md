@@ -39,99 +39,23 @@ The entry point is a load balancer that distribute the traffic over the availabl
 <a name="messages"></a>
 ## 3. Messages
 
-* ### Messages - Join user and send Message Sequence Diagram:
+* ### JoinRoom sequence diagram:
 
-```plantuml
-@startuml
+![uml_join](./Documentation/images/uml_joinRoom.png)
 
-actor "User 1"
-actor "User 2"
-participant "Server Websocket \n(Server Verticle)"
-participant "Server Websocket \n(Client Verticle)"
-participant "EventBus"
-database "messages MongoDB"
+* ### Text Message sequence diagram:
 
-"User 1" -> "Server Websocket \n(Server Verticle)" : register Request
-"Server Websocket \n(Server Verticle)" -> "Server Websocket \n(Client Verticle)" : newClient
-"Server Websocket \n(Client Verticle)" -> "EventBus" : suscribe
-"EventBus" -> "Server Websocket \n(Client Verticle)" : suscribed
-"Server Websocket \n(Client Verticle)" -> "Server Websocket \n(Server Verticle)" : client created
+![uml_text](./Documentation/images/uml_sendTextMessage.png)
+
+* ### Error & Retry sequence diagram:
+
+![umlretry](./Documentation/images/uml_retryTextMessage.png)
 
 
-"User 1" <-- "Server Websocket \n(Server Verticle)" : registered Response
-"User 1" -> "Server Websocket \n(Server Verticle)" : send Message
-"Server Websocket \n(Server Verticle)" -> "EventBus" : publish message
+* ### Reconnection sequence diagram:
 
-"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store message into DB
+![umlreconnect](./Documentation/images/uml_Reconnect.png)
 
-"EventBus" -> "Server Websocket \n(Client Verticle)" : read message
-"Server Websocket \n(Client Verticle)" -> "User 2" : read message
-
-@enduml
-```
-
-* ### Messages with error & retry sequence diagram:
-
-```plantuml
-@startuml
-
-actor "User 1"
-
-participant "Server Websocket \n(Server Verticle)"
-participant "Server Websocket \n(Client Verticle)"
-participant "EventBus"
-database "messages MongoDB"
-
-"User 1" -> "Server Websocket \n(Server Verticle)" : send Message A
-"Server Websocket \n(Server Verticle)" -> "EventBus" : publish message A
-"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store message A into DB
-
-"User 1" ->x "Server Websocket \n(Server Verticle)" : send Message B
-"User 1" -> "Server Websocket \n(Server Verticle)" : send Message C and retry Message B
-
-"Server Websocket \n(Server Verticle)" -> "EventBus" : publish messages (B & C)
-"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store messages (B & C) into DB
-
-"User 1" <-- "EventBus" : message A ACK 
-"User 1" <-- "EventBus" : message B ACK 
-
-@enduml
-```
-
-* ### Messages with error & retry sequence diagram:
-
-```plantuml
-@startuml
-
-actor "User 1"
-participant "Server 1 Websocket \n(Server Verticle)"
-participant "Server 1 Websocket \n(Client Verticle)"
-participant "EventBus"
-
-== Fisrt user connection ==
-
-"User 1" -> "Server 1 Websocket \n(Server Verticle)" : register Request
-"Server 1 Websocket \n(Server Verticle)" -> "Server 1 Websocket \n(Client Verticle)" : newClient
-"Server 1 Websocket \n(Client Verticle)" -> "EventBus" : suscribe
-"EventBus" -> "Server 1 Websocket \n(Client Verticle)" : suscribed
-"Server 1 Websocket \n(Client Verticle)" -> "Server 1 Websocket \n(Server Verticle)" : client created
-"User 1" <-- "Server 1 Websocket \n(Server Verticle)" : registered Response
-
-... Some correct messages sent and received before server crash ...
-
-== Reconnection ==
-
-"User 1" <-- "Server 1 Websocket \n(Server Verticle)" : <font color=red><b>Reconnect Request (Server 1  is going to dead)
-
-"User 1" -> "Server 2 Websocket \n(Server Verticle)" : reconnect Request
-"Server 2 Websocket \n(Server Verticle)" -> "Server 2 Websocket \n(Client Verticle)" : reconnectClient
-"Server 2 Websocket \n(Client Verticle)" -> "EventBus" : reconnect
-"EventBus" -> "Server 2 Websocket \n(Client Verticle)" : reconnected
-"Server 2 Websocket \n(Client Verticle)" -> "Server 2 Websocket \n(Server Verticle)" : client reconnected
-"User 1" <-- "Server 2 Websocket \n(Server Verticle)" : reconnect Response
-
-@enduml
-```
 
 <a name="testing"></a>
 ## 4. Testing the Enviroment and Application
