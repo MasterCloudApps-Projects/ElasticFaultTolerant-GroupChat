@@ -171,17 +171,17 @@ export class ChatComponent implements OnInit {
                     throwError('Max amount of retries reached')
                   )));
           })
-         //,
-         // repeatWhen((event) => {
-         //   return event.pipe(
-         //     tap((error) => { console.log('Error Repeat: ', event); }),
-         //     concatMap((e, i) =>
-         //       iif(
-         //         () => i < this.reconnectAttempts,
-         //         of(e).pipe(delay(this.reconnectInterval)),
-         //         throwError('Max amount of retries reached')
-         //       )));
-         //})
+         ,
+          repeatWhen((event) => {
+            return event.pipe(
+              tap((error) => { console.log('Error Repeat: ', event); }),
+              concatMap((e, i) =>
+                iif(
+                  () => i < this.reconnectAttempts,
+                  of(e).pipe(delay(this.reconnectInterval)),
+                  throwError('Max amount of retries reached')
+                )));
+         })
          )
         .subscribe(
           (message: Message) => { this.onMessage(message); },
@@ -356,12 +356,15 @@ export class ChatComponent implements OnInit {
       this.pendingmessages.set(message.params.uuid,message);
       this.messageId++;
 
+      if (this.socket.closed){
+        this.reconnect();
+      }
+
       console.log("New message from client to websocket: ", message);
       this.sendAllMesssages();
       this.messageText = "";
 
-
-      setTimeout(() => this.scrollToBottom(), 500);
+      setTimeout(() => this.scrollToBottom(), 125);
     }
   }
 
