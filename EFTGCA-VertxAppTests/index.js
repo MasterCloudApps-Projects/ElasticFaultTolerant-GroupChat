@@ -6,7 +6,8 @@ const TEST_USERID = "UserId_";
 const TEST_USERNAME = "UserName ";
 const TEST_ROOMNAME = "Tests Room";
 const TEST_TEXT_MESSAGE = "Message text number";
-const USER_TESTS = 3;
+const USER_TESTS = 30;
+const MSGS_TEST = 1000;
 
 var chatMessagesManagerArray = [];
 
@@ -14,9 +15,10 @@ testWithNUsers(USER_TESTS);
 
 function testWithNUsers(usersCount){
     createTestUsers(usersCount);
+
     setTimeout(function() {
         initTest(usersCount);
-    }, 5000)
+    }, 2000)
 }
 
 function createTestUsers(usersCount){
@@ -24,7 +26,7 @@ function createTestUsers(usersCount){
         chatMessagesManagerArray[i] = new ChatMessagesManager(url);
         
         chatMessagesManagerArray[i].on('textMessage',(data) => {
-            console.log(data.user + " say: " + data.text)
+            console.log(data.userName + " say: " + data.text)
         });
 
         chatMessagesManagerArray[i].on('reconnect',(data) => {
@@ -48,7 +50,9 @@ function createTestUsers(usersCount){
 function initTest(usersCount){
     for(let i=1 ; i<usersCount ; i++){
         chatMessagesManagerArray[i].joinUser(TEST_USERID + i, TEST_USERNAME + i, TEST_ROOMNAME);
+        sleep(100);
     }
+
     setTimeout(function() {
         sendMessages(usersCount);
     }, 5000)
@@ -56,17 +60,19 @@ function initTest(usersCount){
 
 function sendMessages(usersCount){
     for(let i=1 ; i<usersCount ; i++){
-        chatMessagesManagerArray[i].sendTextMessage(TEST_ROOMNAME, TEST_USERID + i, TEST_USERNAME + i, TEST_TEXT_MESSAGE + " " + i);
+        for(let j=1 ; j < MSGS_TEST ; j++){
+            let randomMessage = i + "_" + j + ": " + makeRandomMessage(15);
+            chatMessagesManagerArray[i].sendTextMessage(TEST_ROOMNAME, TEST_USERID + i, TEST_USERNAME + i, randomMessage);
+            console.log("Sending Message: " + randomMessage);
+            sleep(25);
+        }
     }
     setTimeout(function() {
         checkTestsResult(usersCount);
-    }, 5000)
+    }, 3000)
 }
 
 function checkTestsResult(usersCount){
-
-    //Try to insert an user with different Id but same name
-    chatMessagesManagerArray[usersCount].joinUser(TEST_USERID + "0", TEST_USERNAME + "1", TEST_ROOMNAME);
 
     for(let i=1 ; i<usersCount ; i++){
         console.log("************************************");
@@ -76,4 +82,22 @@ function checkTestsResult(usersCount){
         console.log("************************************");
     }
 }
+
+function sleep(milliseconds) {
+    const date = Date.now();
+    let currentDate = null;
+    do {
+      currentDate = Date.now();
+    } while (currentDate - date < milliseconds);
+}
+
+function makeRandomMessage(length) {
+    var result           = '';
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ abcdefghijklmnopqrstuvwxyz 0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < length; i++ ) {
+       result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+ }
 

@@ -17,6 +17,6 @@
   },
   "homepage": "https://github.com/mscarceller/EFGA-VertxApplicationTests#readme",
   "dependencies": {
-    "eftgca-messages": "^2.0.x"
+    "eftgca-messages": "^2.1.x"
   }
 }
