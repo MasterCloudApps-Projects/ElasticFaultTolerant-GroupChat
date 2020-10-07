@@ -186,7 +186,7 @@ spec:
         component: webchatservice
     spec:
       containers:
-      - image: mscarceller/eftgca-backvertx:0.1.0
+      - image: mscarceller/eftgca-backvertx:1.0.0
         imagePullPolicy: Always
         name: webchatbackend
         ports:
