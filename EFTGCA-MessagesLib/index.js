@@ -33,6 +33,7 @@ class ChatMessagesManager extends EventEmitter {
         this.webSocket = null;
         this.messageId = 1;
         this.messages = new Map();
+        this.serviceMessages = new Map();
         this.pendingMessages = new Map();
         this.connectWebSocket().then(() => {
             console.log("WebSocket initializated succesfully");
@@ -41,6 +42,10 @@ class ChatMessagesManager extends EventEmitter {
 
     getMessages(){
         return this.messages;
+    }
+
+    getServiceMessages(){
+        return this.serviceMessages;
     }
 
     getPendingMessages(){
@@ -87,6 +92,9 @@ class ChatMessagesManager extends EventEmitter {
         }
 
         if(this.isNewUserNotification(message)){
+            if(!this.serviceMessages.has(message.params.uuid)){
+                this.serviceMessages.set(message.params.uuid,message)
+            }
             this.emit(EVENT_NEW_USER, message.params);   
         }
 
@@ -94,6 +102,9 @@ class ChatMessagesManager extends EventEmitter {
             if(this.messages.has(message.params.uuid)){
                 this.messages.get(message.params.uuid).params.ack = true;
                 this.pendingMessages.delete(message.params.uuid);
+            }
+            else{
+                this.messages.set(message.params.uuid,message)
             }
             this.emit(EVENT_TEXT_MESSAGE, message.params);  
         }
@@ -164,11 +175,20 @@ class ChatMessagesManager extends EventEmitter {
                 userId: userId, 
                 roomName: roomName,
                 userName: userName,
+                lastMessageId: this.getlastMessageId()
               },
               id: this.getNewId()
         }
         this.writeMessageIntoWebSocket(JSON.stringify(reconnectMessage));
     }
+
+
+    getlastMessageId(){
+        for (var message of this.chatmessages.entries()) {
+          if (message[1]["_id"]!=null) return message[1]["_id"];
+        }
+        return null;
+      }
 
     sendTextMessage(roomName, userId, userName, messageText){
         let messageUUID = uuid.v4();

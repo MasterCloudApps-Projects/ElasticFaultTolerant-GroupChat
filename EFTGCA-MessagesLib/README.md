@@ -90,6 +90,7 @@ https://www.jsonrpc.org/specification
       "userName": "User 1",
       "roomName": "Room 1",
       "sessionId": "8475234jh62380672306",
+      "lastMessageId": "5f7cb371bdb71b6e1780797b"
     },
     "id": 1
   }
