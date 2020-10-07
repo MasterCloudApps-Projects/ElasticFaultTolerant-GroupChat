@@ -3,8 +3,10 @@
 1. [ Introduction ](#intro)
 2. [ Application description ](#appdesc)
 3. [ Messages ](#messages)
-4. [ Deploy full Chat Application instance](#deploy)
-5. [ Testing the Enviroment and Application ](#testing)
+4. [ Deploy Application ](#deploy)
+    1. [ Deploy on local Kubernetes ](#deployk8s)
+    2. [ Deploy on Okteto Cloud ](#deployOkteto)
+6. [ Testing the Enviroment and Application ](#testing)
     1. [ Chaos testing with Litmus and Okteto ](#caostesting)
 
 
@@ -64,7 +66,15 @@ The entry point is a load balancer that distribute the traffic over the availabl
 </p>
 
 <a name="deploy"></a>
-## 5. Deploy Application
+## 4. Deploy Application
+
+<a name="deployk8s"></a>
+### 4.1 Deploy on local Kubernetes
+
+
+<a name="deployOkteto"></a>
+### 4.2 Deploy on Okteto Cloud
+
 
 <a name="testing"></a>
 ## 5. Testing the Enviroment and Application
