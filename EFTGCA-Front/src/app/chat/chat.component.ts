@@ -131,6 +131,7 @@ export class ChatComponent implements OnInit {
               userId: this.userId,
               roomName: this.roomName,
               userName: this.userName,
+              lastMessageId: this.getlastMessageId()
             },
             "id": this.messageId
       }
@@ -138,6 +139,13 @@ export class ChatComponent implements OnInit {
       console.log("Reconnecting user: ", message);
       this.socket.next(message);
       this.messageId++;
+    }
+
+    private getlastMessageId(){
+      for (var message of this.chatmessages.entries()) {
+        if (message[1]["_id"]!=null) return message[1]["_id"];
+      }
+      return null;
     }
 
     public reconnect(){
