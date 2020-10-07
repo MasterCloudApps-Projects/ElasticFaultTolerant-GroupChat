@@ -155,9 +155,9 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: webchat
+    name: webchatbackend
   minReplicas: 2
-  maxReplicas: 2
+  maxReplicas: 4
   metrics:
   - type: Resource
     resource:
@@ -188,7 +188,7 @@ spec:
       containers:
       - image: mscarceller/eftgca-backvertx:0.1.0
         imagePullPolicy: Always
-        name: webchat
+        name: webchatbackend
         ports:
           - name: websvc-port
             containerPort: 8080
