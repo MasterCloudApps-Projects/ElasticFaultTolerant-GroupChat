@@ -71,6 +71,18 @@
 
 * windows: 
 
+    * Set Enviroment for Okteto:
+
+        ```
+        > $Env:KUBECONFIG=("$HOME\Downloads\okteto-kube.config;$Env:KUBECONFIG;$HOME\.kube\config")
+        ```
+
+    * Set enviroment for DockerDesktop
+
+        ```
+        > $Env:KUBECONFIG=("$HOME\.kube\config;$Env:KUBECONFIG;$HOME\.kube\config")
+        ```
+
     * Install Dashboard:
 
         ```
