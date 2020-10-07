@@ -159,6 +159,7 @@ public class WebChatServer extends AbstractVerticle {
         String userId = message.getJsonObject("params").getString("userId");
         String roomName = message.getJsonObject("params").getString("roomName");
         String userName = message.getJsonObject("params").getString("userName");
+        String lastMessageId = message.getJsonObject("params").getString("lastMessageId");
 
         if (isUserRegisteredInRoom(roomName, userId)){
             System.out.println("User is already register: delete and register again");
@@ -177,7 +178,7 @@ public class WebChatServer extends AbstractVerticle {
                 vertx.eventBus().publish(roomName, newUserNotification.toString());
                 System.out.println("Notify the new user in EventBus:" + newUserNotification.toString());
             }
-            sendLastMessagesInRoom(roomName, serverWebSocket);
+            sendLastMessagesInRoom(roomName, serverWebSocket, lastMessageId);
         }
         else{
             ErrorResponse errorResponse = new ErrorResponse(ErrorCode.USER_EXIST, messageId);
@@ -250,9 +251,11 @@ public class WebChatServer extends AbstractVerticle {
         });
     }
 
-    private void sendLastMessagesInRoom(String roomName, ServerWebSocket serverWebSocket){
-        System.out.println("Sending last messages for the new user in room!");
+    private void sendLastMessagesInRoom(String roomName, ServerWebSocket serverWebSocket, String lastMessageId){
+        System.out.println("Sending last messages (after " + lastMessageId + ") for the new user in room!");
         JsonObject query = new JsonObject().put("params.roomName", roomName);
+        if(lastMessageId != null)
+            query.put("id","{ $gt: "+lastMessageId+" }");
         FindOptions options = new FindOptions();
         options.setLimit(30);
         mongoDBclient.findWithOptions("messages", query, options, res -> {
