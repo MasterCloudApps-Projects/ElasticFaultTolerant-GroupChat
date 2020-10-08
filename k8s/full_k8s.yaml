@@ -4,6 +4,18 @@ metadata:
   name: mscarceller
 
 ---
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eftgca-backvertx-configmap
+  namespace: mscarceller
+data:
+  host: "webchat-mscarceller.cloud.okteto.net"
+  maxMessagesHistory: '100'
+
+---
+ 
 apiVersion: v1
 kind: Secret
 metadata:
@@ -103,7 +115,7 @@ spec:
  type: ClusterIP
  clusterIP: None
  selector:
-   app: webchat
+   app: webchatbackend
  ports:
  - name: hz-port-name
    port: 5701
@@ -122,7 +134,7 @@ metadata:
     type: LoadBalancer
 spec:
   selector:
-    app: webchat
+    app: webchatbackend
   type: LoadBalancer
   ports:
     - name: websvc-port
@@ -161,14 +173,15 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: webchat
+    name: webchatbackend
   minReplicas: 2
-  maxReplicas: 2
+  maxReplicas: 10
   metrics:
   - type: Resource
     resource:
-      name: memory
-      targetAverageUtilization: 1
+      name: cpu
+      targetAverageUtilization: 10
+
 
 ---
 
@@ -178,23 +191,23 @@ metadata:
   name: webchatbackend
   namespace: mscarceller
   labels:
-    app: webchat
+    app: webchatbackend
   annotations:
     litmuschaos.io/chaos: "true"
 spec:
   selector:
     matchLabels:
-      app: webchat
+      app: webchatbackend
   template:
     metadata:
       labels:
-        app: webchat
+        app: webchatbackend
         component: webchatservice
     spec:
       containers:
       - image: mscarceller/eftgca-backvertx:0.1.0
         imagePullPolicy: Always
-        name: webchat
+        name: webchatbackend
         ports:
           - name: websvc-port
             containerPort: 8080
