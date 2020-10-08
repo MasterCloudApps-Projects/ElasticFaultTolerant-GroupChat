@@ -8,7 +8,7 @@ spec:
   engineState: 'active'
   appinfo:
     appns: mscarceller
-    applabel: 'app=webchat'
+    applabel: 'app=webchatbackend'
     appkind: 'deployment'
   chaosServiceAccount: default
   monitoring: false

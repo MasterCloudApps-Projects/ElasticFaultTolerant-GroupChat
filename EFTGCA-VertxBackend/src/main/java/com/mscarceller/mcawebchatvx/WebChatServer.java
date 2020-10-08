@@ -33,6 +33,9 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.FindOptions;
+import io.vertx.config.ConfigStoreOptions;
+import io.vertx.config.ConfigRetriever;
+import io.vertx.config.ConfigRetrieverOptions;
 
 public class WebChatServer extends AbstractVerticle {
 
@@ -40,6 +43,7 @@ public class WebChatServer extends AbstractVerticle {
     private MongoClient mongoDBclient;
     private HttpServer server;
     private MessageHandler messageHandler;
+    private int maxMessagesHistory = 50;
 
     private int messageId;
 
@@ -49,6 +53,24 @@ public class WebChatServer extends AbstractVerticle {
     }
 
     private void startServer(Vertx vertx) {
+
+        ConfigStoreOptions store = new ConfigStoreOptions()
+            .setType("configmap")
+            .setConfig(new JsonObject()
+                .put("namespace", "mscarceller")
+                .put("name", "eftgca-backvertx-configmap")
+            );
+    
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().addStore(store));
+
+        retriever.getConfig(ar -> {
+            if (ar.failed()) {
+                System.out.println("Error retriving configuration properties");
+            } else {
+              JsonObject config = ar.result();
+              this.maxMessagesHistory = config.getInteger("maxMessagesHistory");
+            }
+        });
 
         server = vertx.createHttpServer();
         messageHandler = new MessageHandler();
@@ -257,7 +279,7 @@ public class WebChatServer extends AbstractVerticle {
         if(lastMessageId != null)
             query.put("id","{ $gt: "+lastMessageId+" }");
         FindOptions options = new FindOptions();
-        options.setLimit(30);
+        options.setLimit(this.maxMessagesHistory);
         mongoDBclient.findWithOptions("messages", query, options, res -> {
             if (res.succeeded()) {
                 for (JsonObject message : res.result()) {
