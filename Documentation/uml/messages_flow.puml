@@ -1,0 +1,30 @@
+@startuml
+
+title "Messages - Sequence Diagram"
+
+actor "User 1"
+actor "User 2"
+participant "Server Websocket \n(Server Verticle)"
+participant "Server Websocket \n(Client Verticle)"
+participant "EventBus"
+database "messages MongoDB"
+
+"User 1" -> "Server Websocket \n(Server Verticle)" : register Request
+"Server Websocket \n(Server Verticle)" -> "Server Websocket \n(Client Verticle)" : newClient
+"Server Websocket \n(Client Verticle)" -> "EventBus" : suscribe
+"EventBus" -> "Server Websocket \n(Client Verticle)" : suscribed
+"Server Websocket \n(Client Verticle)" -> "Server Websocket \n(Server Verticle)" : client created
+
+
+
+"User 1" <-- "Server Websocket \n(Server Verticle)" : registered Response
+"User 1" -> "Server Websocket \n(Server Verticle)" : send Message
+"Server Websocket \n(Server Verticle)" -> "EventBus" : publish message
+
+"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store message into DB
+
+"EventBus" -> "Server Websocket \n(Client Verticle)" : read message
+"Server Websocket \n(Client Verticle)" -> "User 2" : read message
+
+
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+
+title "Messages with error & retry - Sequence Diagram"
+
+actor "User 1"
+participant "Server 1 Websocket \n(Server Verticle)"
+participant "Server 1 Websocket \n(Client Verticle)"
+participant "EventBus"
+
+== Fisrt user connection ==
+
+"User 1" -> "Server 1 Websocket \n(Server Verticle)" : register Request
+"Server 1 Websocket \n(Server Verticle)" -> "Server 1 Websocket \n(Client Verticle)" : newClient
+"Server 1 Websocket \n(Client Verticle)" -> "EventBus" : suscribe
+"EventBus" -> "Server 1 Websocket \n(Client Verticle)" : suscribed
+"Server 1 Websocket \n(Client Verticle)" -> "Server 1 Websocket \n(Server Verticle)" : client created
+"User 1" <-- "Server 1 Websocket \n(Server Verticle)" : registered Response
+
+... Some correct messages sent and received before server crash ...
+
+== Reconnection ==
+
+"User 1" <-- "Server 1 Websocket \n(Server Verticle)" : <font color=red><b>Reconnect Request (Server 1  is going to dead)
+
+"User 1" -> "Server 2 Websocket \n(Server Verticle)" : reconnect Request
+"Server 2 Websocket \n(Server Verticle)" -> "Server 2 Websocket \n(Client Verticle)" : reconnectClient
+"Server 2 Websocket \n(Client Verticle)" -> "EventBus" : reconnect
+"EventBus" -> "Server 2 Websocket \n(Client Verticle)" : reconnected
+"Server 2 Websocket \n(Client Verticle)" -> "Server 2 Websocket \n(Server Verticle)" : client reconnected
+"User 1" <-- "Server 2 Websocket \n(Server Verticle)" : reconnect Response
+
+@enduml

@@ -1,0 +1,26 @@
+@startuml
+
+title "Messages with error & retry - Sequence Diagram"
+
+actor "User 1"
+
+participant "Server Websocket \n(Server Verticle)"
+participant "Server Websocket \n(Client Verticle)"
+participant "EventBus"
+database "messages MongoDB"
+
+"User 1" -> "Server Websocket \n(Server Verticle)" : send Message A
+"Server Websocket \n(Server Verticle)" -> "EventBus" : publish message A
+"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store message A into DB
+
+"User 1" ->x "Server Websocket \n(Server Verticle)" : send Message B
+"User 1" -> "Server Websocket \n(Server Verticle)" : send Message C and retry Message B
+
+"Server Websocket \n(Server Verticle)" -> "EventBus" : publish messages (B & C)
+"Server Websocket \n(Server Verticle)" -> "messages MongoDB" : store messages (B & C) into DB
+
+"User 1" <-- "EventBus" : message A ACK 
+"User 1" <-- "EventBus" : message B ACK 
+
+
+@enduml

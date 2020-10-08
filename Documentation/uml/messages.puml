@@ -1,0 +1,105 @@
+@startuml
+
+title Messages Protocol
+
+
+class Message #DDDDDD {
+  String jsonrpc   
+  String id
+
+}
+note right
+    jsonrpc MUST be exactly "2.0".
+    end note
+
+class RequestMessage #DDDDDD{
+    String method
+}
+
+
+class UserTextMessage{
+    method = SEND_TEXT_MESSAGE
+    UserTextMessageParams params
+}
+
+class UserTextMessageParams{
+    String user
+    String room
+    String text
+}
+
+class UserRegisterMessage{
+    method = REGISTER_USER
+    UserRegisterMessageParams params
+}
+
+class UserRegisterMessageParams{
+    String user
+    String room
+}
+
+class ResponseMessage #DDDDDD{
+}
+
+class ResultMessage #DDDDDD{
+    ResultMessagePayload result
+}
+
+class ResultMessagePayload{
+    Int resultCode
+    String message
+}
+
+class ErrorMessage #DDDDDD{
+    Error error
+}
+
+class Error #DDDDDD{
+    String code
+    String message
+
+}
+
+enum method{
+    SEND_TEXT_MESSAGE
+    REGISTER_USER
+}
+
+enum messagestatus{
+    SENT
+    DELIVERED
+}
+
+
+Message <|-down- RequestMessage
+Message <|-down- ResponseMessage
+ResponseMessage <|-down- ErrorMessage
+ResponseMessage <|-down- ResultMessage
+
+RequestMessage <|-down- UserRegisterMessage
+RequestMessage <|-down- UserTextMessage
+
+ErrorMessage *-down-  ErrorD
+UserTextMessage *-down-  UserTextMessageParams
+UserRegisterMessage *-down-  UserRegisterMessageParams
+
+ResultMessage *-down- ResultMessagePayload
+
+
+legend
+EXAMPLES
+
+--> data sent to Server
+<-- data sent to Client
+
+--> {"jsonrpc": "2.0", "method": "joinRoom", "params": {"room": "Room 1", "user": "user 1"}, "id": 1}
+<-- {"jsonrpc": "2.0", "result": {"status":"OK", "message": "You have joined as User 1", "sessionId": "8475234jh62380672306"}, "id": 1}
+
+
+--> {"jsonrpc": "2.0", "method": "SEND_TEXT_MESSAGE", "params": {"room": "Room 1", "user": "user 1", "message":"Example text message"}, "id": 2}
+<-- {"jsonrpc": "2.0", "result": {"code":"DELIVERED","message":"Message Delivered"}, "id": 2}
+
+end legend
+
+
+@enduml
