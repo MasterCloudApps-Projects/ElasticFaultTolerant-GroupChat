@@ -1,8 +1,105 @@
 # Elastic & FaultTolerant GroupChat Application Messages Lib
 
-Javascript module to manage messages between frontend apps and chat server. 
+Javascript module to manage messages between frontend and test apps and chat server.
+Originally design for the [Elastic & FaultTolerant GroupChat Application.](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat)
 
-## Messages types and specs. <a name="messages"></a>
+## Installation
+
+  ```shell
+    > npm i eftgca-messages
+  ```
+
+---
+
+## Getting started: sample of usage:
+
+Next example show how to use the library to send a *joinRoom* Message, and send/receive text messages form other users in room:
+
+  ```javascript
+    var ChatMessagesManager = require('eftgca-messages');
+
+    const url = 'url_of_the_websocket';
+    const TEST_USERID = "UserId";
+    const TEST_USERNAME = "UserName";
+    const TEST_ROOMNAME = "Tests Room";
+  
+    var chatMessagesManager = new ChatMessagesManager(url);
+  
+    // suscribe to textMessage event:
+    chatMessagesManager.on('textMessage',(message) => {
+      console.log(data.userName + " say: " + data.text)
+    });
+
+    // suscribe to new users notificacion event:
+    chatMessagesManager.on('newUser',(message) => {
+      console.log(message.text)
+    });
+
+    // suscribe to responses event:
+    chatMessagesManager.on('response',(data) => {
+      console.log("Response " + data.result + " to request number "+ data.id)
+    });
+
+    // suscribe to error event:
+    chatMessagesManager.on('error',(error) => {
+      console.log("Error (" + error.code + "): " + error.message)
+    });
+
+    //Join User into the chat room
+    chatMessagesManager.joinUser(TEST_USERID, TEST_USERNAME, TEST_ROOMNAME);
+
+	// send messages to the room
+    chatMessagesManager.sendTextMessage(TEST_ROOMNAME, TEST_USERID, TEST_USERNAME, "Hello World!);
+  
+  ```
+
+---
+
+
+
+## Constructors:
+
+  **ChatMessagesManager**(String url)
+
+   Create an instance with a websocket url.
+
+---
+
+
+
+## Properties:
+
+| Name   |      Type(Default)      |  Description |
+|-----------|:----------:|:------|
+| url       |     String      | The url where the server publish the websoket |
+| webSocket |     WebSocket      |   The websocket created with the url |
+| messageId | Int(1) |    Index for the messages sent |
+| messages | Map() |    Map to store messasges in chat|
+| serviceMessages | Map() |    Map to store service messasges |
+| pendingMessages | Map() |    Map to store service messasges |
+
+
+---
+
+
+## Events:
+
+The ChatMessagesManager emmit events:
+
+| Event (String)  |      Data    |  Description |
+|-----------|:----------|:------|
+|EVENT_ERROR (error)|Error Message|Error ocurred|
+|EVENT_RESPONSE (response)|Response|The response for a previous sent message, identified by id.|
+|EVENT_ONCLOSE (closedConnection)|Close connection Notification|Notification for a closed connection.|
+|EVENT_NEW_USER (newUser)|New user Notification|Notify  new user in room|
+|EVENT_RECONNECT (reconnect)|Reconnect notification message|Reconnection notification|
+|EVENT_TEXT_MESSAGE (textMessage)|Text Message|Notify new text message in room|
+
+---
+
+
+
+## Messages types and specs.
 
 * Requests and Messages sent by clients (users) must be a JSON object with these properties:
 
@@ -185,3 +282,28 @@ https://www.jsonrpc.org/specification
     }
   }
   ```
+
+
+
+## Methods:
+
+
+- **joinUser**(userId, userName, roomName) Send joinRomm message with userId, userName, and roomName params.
+
+-  **reconnectUser**(userId, userName, roomName, sessionId) Send reconnect message with userId, userName, roomName and sessionId params.
+
+-  **sendTextMessage**(roomName, userId, userName, messageText) Send text message with userId, userName, roomName and the text of the message.
+
+-  **getMessages**() return all the messages (received and sent)
+
+-  **getServiceMessages**() return the service messages
+
+-  **getPendingMessages**() return all the messages that have been sent but no ack received.
+
+---
+
+
+
+## License
+
+"eftgca-messages" is licensed under [Apache License](https://www.apache.org/licenses/LICENSE-2.0.txt).

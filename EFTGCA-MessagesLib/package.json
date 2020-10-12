@@ -1,13 +1,18 @@
 {
   "name": "eftgca-messages",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Javascript library for ElasticFaultTolerant-GroupChat",
   "main": "index.js",
+  "homepage": "https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-MessagesLib",
+  "repository": {
+    "type" : "git",
+    "url" : "https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-MessagesLib"
+  },
   "scripts": {
     "test": "jest"
   },
   "author": "Miguel S.C. <mscarceller@gmail.com>",
-  "license": "MIT",
+  "license": "Apache V2.0",
   "dependencies": {
     "ws": "^7.3.1",
     "uuid": "8.3.0"
