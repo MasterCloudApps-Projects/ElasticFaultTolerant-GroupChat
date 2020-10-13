@@ -69,6 +69,8 @@ When the application fails and the client get a disconnect event from the websoc
 
 
 
+You can find a full description of the application in the [EFTGCA-VertxBackend](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-VertxBackend) folder.
+
 ---
 
 
