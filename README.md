@@ -4,6 +4,7 @@
 
 1. [ Introduction ](#intro)
 2. [ Getting Started ](#gettingstarted) 
+3. [ Testing the application ](#testing)
 
 <a name="intro"></a>
 
@@ -77,4 +78,20 @@ When the application fails and the client get a disconnect event from the websoc
 ## **2. Getting Started**
 
 Please, visit the [Getting Started](./Documents/GettingStarted.md) document
+
+
+
+---
+
+<a name="testing"></a>
+
+## 3. Testing the application
+
+
+
+Please, visit the [Chaos Testing with Litmus and Okteto Cloud](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/blob/master/Documents/ChaosTestingOkteto.md) document or visit the wiki.
+
+You can find some test examples of testing scripts in the [EFTGCA-VertxAppTests](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-VertxAppTests) project.
+
+ 
 
