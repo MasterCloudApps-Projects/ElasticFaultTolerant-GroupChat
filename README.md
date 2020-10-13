@@ -3,7 +3,7 @@
 
 
 1. [ Introduction ](#intro)
-2. [ Getting Started ](#gettinstarted) 
+2. [ Getting Started ](#gettingstarted) 
 
 <a name="intro"></a>
 
