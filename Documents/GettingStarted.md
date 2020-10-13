@@ -3,8 +3,8 @@
 
 1. [Deploy on local Kubernetes](#kubernetes)
 2. [Deploy on Okteto Cloud](#okteto)
-3. [Deploy Sample Angular front application](#frontend)
-4. [Usage Messages Library](#messageslib)
+3. [Deploy Sample Angular front application](#front)
+4. [Usage Messages Library](#messagelib)
 
 <a name="kubernetes"></a>
 
