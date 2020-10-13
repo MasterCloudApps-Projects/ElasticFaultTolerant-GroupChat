@@ -2,12 +2,12 @@
 
 
 1. [Deploy on local Kubernetes](#kubernetes)
-
 2. [Deploy on Okteto Cloud](#okteto)
-
 3. [Deploy Sample Angular front application](#frontend)
+4. [Usage Messages Library](#messageslib)
 
 <a name="kubernetes"></a>
+
 ## 1. Deploy on local Kubernetes
 
 * ####  Setting up Kubernetes with Minikube
@@ -304,3 +304,13 @@ deployment.apps/webchatfront created
 Now you can open the application in your browser at https://webchat-mscarceller.cloud.okteto.net/
 
 **NOTE**: Remember to edit the Local Hosts File if you deploy on local Kubernetes
+
+
+
+---
+
+<a name="messagelib"></a>
+
+## 4. Usage Message Library
+
+Please, visit the [Elastic & FaultTolerant GroupChat Application Messages Lib](../EFTGCA-MessagesLib/README.md) project.
