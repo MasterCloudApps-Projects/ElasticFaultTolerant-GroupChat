@@ -282,7 +282,7 @@ Once you have your cli tool configured to use with Okteto you can use the same c
 
 You can also visit Okteto cloud dashboard and see something like this:
 
-![image-20201013143214709](./images/oktetoDeploy.png)
+![image-20201013143214709](./images/oktetodeploy.png)
 
 ---
 <a name="front"></a>
