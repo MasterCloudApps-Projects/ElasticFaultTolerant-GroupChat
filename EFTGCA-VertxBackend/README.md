@@ -133,12 +133,11 @@ This chapter describes the basic processes in the application, such a login proc
 ## 3. Kubernetes architecture elements
 
 
-
 This is a basic schema of our deployment:
 
-![](..\Documents\images\kubernetes.png)
-
-
+  <p align="center">
+    <img src=../Documents/images/kubernetes.png>
+  </p>
 
 All the elements are inside a namespace. Kubernetes cluster will instantiate the namespace when provisioning the cluster to hold the default set of Pods, Services, and Deployments used by the cluster.
 
