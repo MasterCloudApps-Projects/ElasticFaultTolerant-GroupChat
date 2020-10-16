@@ -1,7 +1,411 @@
 # Elastic & FaultTolerant GroupChat Application - Vert.x based Application
 
 
-## Building and publish the image into DockerHub registry
+
+1. [Introduction](#intro)
+
+2. [Application description](#description)
+
+3. [Kubernetes architecture elements](#k8s) 
+
+4. [Building and publish the image into DockerHub](#build)
+
+5. [Packaging the application](#packaging) 
+
+6. [Running the application](#running)
+
+   
+
+<a name="intro"></a>
+## 1. Introduction
+
+This repository contains all the necessary code for deploy an elastic, fault Tolerant chat application. 
+The application is based on [Vert.x](https://vertx.io/) Framework. Vert.x is an open source, reactive  software development toolkit from the developers of Eclipse.
+
+
+
+![](../Documents/images/startPoint.png)
+
+Each pod contains an instance of our application. It creates a server verticle at start, that is listening for websocket users connections. When an user send a valid ***joinRoom*** request the server verticle instantiate a client verticle and register into a event bus (for more information about Vert.x event bus visit this [link](https://vertx.io/docs/vertx-core/java/#event_bus)) .
+
+So, when an user send a message to the application, the server publish it into the event bus, and all the clients, that are subscribed to it, receive the message and sent it to the users through the websocket. 
+
+The Map that contains all the clients information is shared between the server verticle in different pods using a Hazelcast cluster.
+
+All the messages are stored and persisted into a shared mongoDB instance. Form more information about mongoDB client in Vert.x visit this [link](https://vertx.io/docs/vertx-mongo-client/java/).
+
+All of this elements are deploy on a Kubernetes cluster and all are described in the next sections.
+
+
+
+---
+<a name="description"></a>
+
+## 2. Application Description
+
+This chapter describes the basic processes in the application, such a login process o messages sending:
+
+
+
+* #### Connect to server:
+
+  First of all is the establishment of a websocket connection between the client and the server. Our server verticle is ready for incoming connections at "/chat" path:
+
+  ```java
+  // Init the websocket handler
+          server.webSocketHandler((serverWebSocket) -> {
+              if (serverWebSocket.path().equals("/chat")) {
+              ...
+  ```
+
+  
+
+- #### Register user and join into a chat room:
+
+  The basic flow for register an user and join into room is described in the next images:
+
+  <p align="center">
+      <img width="600" src="../Documents/images/uml_joinRoom_2.png">
+  </p>
+  
+  The user send a ***joinRoom*** message, that contains the userId, userName and roomName. The server verticle checks if the userId is already registered and if is the case it reconnect the user again. If the userId isn't registered yet the server check the userName, because two users can't join the room with the same userName. If the userName already exists in the room the server responds to the user with an error message.
+  
+  
+  
+  
+
+<p align="center">
+    <img width="400" src="../Documents/images/uml_joinRoom.png">
+</p>
+​		When all this conditions are satisfied, the server register the user creating a client verticle and subscribing it into the event bus as a consumer:
+
+```java
+	private void startClient(Vertx vertx) {
+        // Listen for messages from his chat
+        this.handler = vertx.eventBus().consumer(this.room).handler(data -> {
+            try{
+                // Try to send the message
+                System.out.println("Reading message from event bus: " + data.body().toString());
+                serverWebSocket.writeFinalTextFrame(data.body().toString());
+                System.out.println("Writing to socket: " + "Server response to:" + data.body().toString());
+            }catch(IllegalStateException e){
+                // The user is offline, so I delete it.
+                vertx.eventBus().publish("delete.user", "{\"roomName\":\""+this.room+"\",\"userId\":\""+this.id+"\"}");
+                this.handler.unregister();
+            } 
+        });
+    }
+```
+
+
+
+
+* #### Sending and receiving messages:
+
+  As we have mentioned above, when an user send a message to the application, the server publish it into the event bus, and all the clients, that are subscribed to it, consume the message and sent it to the users through the websocket. 
+
+  The basic flow:
+
+  <p align="center">
+    <img width="560" src=../Documents/images/uml_sendTextMessage.png>
+  </p>
+
+  
+* #### Error and retry process flow:
+
+  When an error occurred sending message the user don't receive the ack message and can try to send it again. 
+  
+  <p align="center">
+    <img width="560" src=../Documents/images/uml_retryTextMessage.png>
+  </p>
+
+- #### Reconnection after failure:
+
+  When the connection between user and server fails it automatically can try to reconnect. When the user send a reconnect message it includes the information about the last message received (lastMessageId), and the server send the pending messages to it.
+
+<p align="center">
+  <img width="680" src=../Documents/images/uml_reconnect.png>
+</p>
+
+---
+
+<a name="k8s"></a>
+## 3. Kubernetes architecture elements
+
+
+
+This is a basic schema of our deployment:
+
+![](C:\Users\51077146b\Desktop\TFM\OFICIAL\ElasticFaultTolerant-GroupChat\Documents\images\kubernetes.png)
+
+
+
+All the elements are inside a namespace. Kubernetes cluster will instantiate the namespace when provisioning the cluster to hold the default set of Pods, Services, and Deployments used by the cluster.
+
+Use the file *namespace.yaml*  inside k8s folder which describes a namespace:
+
+```yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: mscarceller
+```
+
+To create it run next command inside k8s folder:
+
+```shell
+kubectl create -f ./namespace.yaml
+```
+
+
+
+All the other elements are included on the Kubernetes manifest by file  used for deployment, and described below:
+
+- #### Ingress:
+
+```yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: webchat-ingress
+  namespace: mscarceller
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  rules:
+  - host: webchat-mscarceller.cloud.okteto.net
+    http:
+      paths:
+        - path: /
+          backend:
+            serviceName: webchatfrontservice      
+            servicePort: 8081
+        - path: /chat
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
+```
+
+It redirect the incoming traffic on *http://webchat-mscarceller.cloud.okteto.net/chat* to the service webchat on port 8080.
+
+**NOTE**: we have Ingress configuration ready to deploy a front application on port 8081
+
+For more info about Kubernetes ingress visit https://kubernetes.io/docs/concepts/services-networking/ingress/
+
+
+
+- #### Hazelcast service 
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+ namespace: mscarceller
+ name: webchatservice
+spec:
+ type: ClusterIP
+ clusterIP: None
+ selector:
+   app: webchatbackend
+ ports:
+ - name: hz-port-name
+   port: 5701
+   targetPort: 5701
+   protocol: TCP
+```
+
+It able the application to discovery and group membership of Vert.x nodes in a cluster
+
+
+
+- #### Load Balancer service
+
+  As we saw on the Ingress description, the traffic is redirect to this service and the load balancer distribute it between the backend Pods.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: webchat
+  namespace: mscarceller
+  labels:
+    webchatcluster: "true"
+    app: webchat
+    type: LoadBalancer
+spec:
+  selector:
+    app: webchatbackend
+  type: LoadBalancer
+  ports:
+    - name: websvc-port
+      protocol: TCP
+      port: 8080
+      targetPort: 8080
+```
+
+For more info about Kubernetes Load Balancer visit https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/
+
+
+
+- #### MongoDB StatefulSet
+
+StatefulSet are Kubernetes objects used to manage stateful applications. It manages the deployment and scaling of a set of Pods.
+
+Unlike a Deployment, a StatefulSet maintains a sticky identity for each of their Pods. The pods are created from the same spec, but are not interchangeable: each has a persistent identifier that it maintains across any rescheduling.
+
+We need all of our databases read and write on the same collections so we add also a storage volumes to provide persistences. Although individual Pods in a StatefulSet are susceptible to failure, with this volume all the databases have the same data.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: mscarceller
+  labels:
+    app: mongodb
+spec:
+  clusterIP: None
+  selector:
+    app: mongodb
+    
+---
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: mscarceller
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        selector: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:4.0.8
+        env:
+          - name: MONGO_INITDB_ROOT_USERNAME_FILE
+            value: /etc/webchat/admin/MONGO_ROOT_USERNAME
+          - name: MONGO_INITDB_ROOT_PASSWORD_FILE
+            value: /etc/webchat/admin/MONGO_ROOT_PASSWORD
+        volumeMounts:
+        - name: webchat-volume
+          mountPath: /etc/webchat
+          readOnly: true
+      volumes:
+      - name: webchat-volume
+        secret:
+          secretName: webchat-secrets
+          items:
+          - key: MONGO_ROOT_USERNAME
+            path: admin/MONGO_ROOT_USERNAME
+            mode: 0444
+          - key: MONGO_ROOT_PASSWORD
+            path: admin/MONGO_ROOT_PASSWORD
+            mode: 0444
+   
+```
+
+For more info about Kubernetes StatefulSet visit https://kubernetes.io/docs/tutorials/stateful-application/basic-stateful-set/
+
+
+
+- #### Horizontal Pod Autoscaler (HPA)
+
+The scalability is based on ***Horizontal Pod Autoscaler*** that automatically scales the number of Pods in the application deployment, based on observed CPU utilization or on some other, application-provided metrics. The HPA is implemented as a control loop, and, during each period, the controller manager queries the resource utilization against the metrics specified in each *HorizontalPodAutoscaler* definition.
+
+For example, in our case we have defined:
+
+```yaml
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: webchat-consumer
+  namespace: mscarceller
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: webchatbackend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 25
+```
+
+The HPA  fetches metrics from a series of aggregated APIs (`metrics.k8s.io`, `custom.metrics.k8s.io`, and `external.metrics.k8s.io`). The `metrics.k8s.io` API is usually provided by metrics-server, which needs to be launched separately. We explain how to install and launch it on the deploy section of this document.
+
+You can see [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/) for more details.
+
+
+
+- #### Application Deployment
+
+It defines the specs that we need to deploy our applications such as image name, or ports, or resoruces.
+
+This is the deployment of our application
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webchatbackend
+  namespace: mscarceller
+  labels:
+    app: webchatbackend
+  annotations:
+    litmuschaos.io/chaos: "true"
+spec:
+  selector:
+    matchLabels:
+      app: webchatbackend
+  template:
+    metadata:
+      labels:
+        app: webchatbackend
+        component: webchatservice
+    spec:
+      containers:
+      - image: mscarceller/eftgca-backvertx:0.1.0
+        imagePullPolicy: Always
+        name: webchatbackend
+        ports:
+          - name: websvc-port
+            containerPort: 8080
+          - name: hazlecast
+            containerPort: 5701
+        resources:
+          limits:
+            cpu: 500m
+          requests:
+            cpu: 200m
+      terminationGracePeriodSeconds: 60
+
+```
+
+ The most important points are:
+
+- **Ports**: we have to set the available ports. Port 8080 for the http traffic and 5701 for Hazelcast.
+- **Termination Grace Period Seconds**: If a Pod die or the HPA needs to kill it, the Pod's phase will be `Terminating` and remain there until the Pod is killed after its `terminationGracePeriodSeconds` expires. It able the application to send reconnect messages to the users connected on this pod.
+- **Resources**: the physical resoruces needed by the pods to run the application.
+- **Image**: the name of the image on DockerHub that contains the application
+- **imagePullPolicy**: Always download the application image form DockerHub
+
+
+
+---
+<a name="build"></a>
+## 4. Building and publish the image into DockerHub
 
 * Build the image:
 
@@ -9,7 +413,7 @@
     > docker build -t mscarceller/eftgca-backvertx:1.0.0 .
     ```
 
-* Push the image to Dockerhub
+* Push the image to Dockerhub:
 
     ```
     > docker push mscarceller/eftgca-backvertx:1.0.0
@@ -17,7 +421,9 @@
 
 ---
 
-## Packaging the application for use locally as .jar file
+
+<a name="packaging"></a>
+## 5. Packaging the application for use locally as .jar file
 
 * Package the application:
 
@@ -32,7 +438,10 @@
     ```
 
 ---
-## Running the application
+
+
+<a name="running"></a>
+## 6. Running the application
 
 * Run the application:
 
@@ -53,11 +462,6 @@
     ```
 
 ---
-
-
-
-
-
 
 
 

@@ -1,0 +1,28 @@
+@startuml
+
+title Join Room
+
+(*) --> "joinRoom Message" as jR
+note right
+  User send a "joinRoom Message" with:
+   - userId
+   - userName
+   - userRoom
+end note
+
+if "userId already registered" then
+    -->[No] "joinRoom Process"
+    if "userName already registered" then
+        -left> [yes] "request different name" as rN
+      else
+        --> [no] "start Chat" as sC
+      endif
+else
+    -->[Yes] "reconnect Process" as rP
+endif
+
+rN -> jR
+rP ---> sC
+sC --> (*)
+
+@enduml
