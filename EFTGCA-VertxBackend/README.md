@@ -136,7 +136,7 @@ This chapter describes the basic processes in the application, such a login proc
 
 This is a basic schema of our deployment:
 
-![](C:\Users\51077146b\Desktop\TFM\OFICIAL\ElasticFaultTolerant-GroupChat\Documents\images\kubernetes.png)
+![](..\Documents\images\kubernetes.png)
 
 
 
