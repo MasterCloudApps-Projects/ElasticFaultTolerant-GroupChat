@@ -1,4 +1,4 @@
-const WebSocket = require('ws');
+const WebSocket = require('isomorphic-ws');
 var uuid = require('uuid');
 let EventEmitter = require('events').EventEmitter
 
@@ -12,6 +12,7 @@ const WEBSOCKET_STATE = {
 const JSONRPC_VERSION = "2.0";
 
 //  Emmited events
+const EVENT_CONNECTED = "connected";
 const EVENT_ERROR = "error";
 const EVENT_RESPONSE = "response";
 const EVENT_ONCLOSE = "closedConnection";
@@ -32,12 +33,49 @@ class ChatMessagesManager extends EventEmitter {
         this.url =  url;
         this.webSocket = null;
         this.messageId = 1;
+
+        this.sessionId = uuid.v4();
+        this.userId = ""; 
+        this.roomName = "";
+        this.userName = "";
+
         this.messages = new Map();
         this.serviceMessages = new Map();
         this.pendingMessages = new Map();
+        
         this.connectWebSocket().then(() => {
             console.log("WebSocket initializated succesfully");
         })
+
+        this.reconnectUser = function(){
+            let self = this;
+            console.log("Reconnecting user...");
+            let id = this.getNewId()
+            let reconnectMessage = {
+                  jsonrpc: JSONRPC_VERSION,
+                  method: METHOD_RECONNECT,
+                  params: {
+                    sessionId: self.sessionId,
+                    userId: self.userId, 
+                    roomName: self.roomName,
+                    userName: self.userName,
+                    lastMessageId: self.getlastMessageId()
+                  },
+                  id: id
+            }
+            self.serviceMessages.set(id,reconnectMessage);
+            self.connectWebSocket().then(() => {
+                self.writeMessageIntoWebSocket(reconnectMessage);
+                self.sendPendingMessages();
+            })   
+        }
+
+        this.getlastMessageId = function(){
+            for (var message of this.messages.entries()) {
+              if (message[1]["_id"]!=null) return message[1]["_id"];
+            }
+            return null;
+        }
     }
 
     getMessages(){
@@ -53,22 +91,29 @@ class ChatMessagesManager extends EventEmitter {
     }
 
     connectWebSocket() {
+        let self = this;
         console.log("Connecting to " + this.url);
         return new Promise((resolve, reject) => {
+
             this.webSocket = new WebSocket(this.url);
+
             this.webSocket.onopen = () => {
                 this.webSocket.addEventListener("message", (message) => {
                     this.decodeMessage(JSON.parse(message.data));
                 });
-                this.sendPendingMessages();
+                self.emit(EVENT_CONNECTED, null); 
                 resolve(this);
             };
+
             this.webSocket.onerror = function(err) {
-                console.log(err);
-                this.emit(EVENT_ERROR, err); 
+                self.emit(EVENT_ERROR, err);      
             };
+
             this.webSocket.onclose = function(event) {
-                this.emit(EVENT_ONCLOSE, event); 
+                self.emit(EVENT_ONCLOSE, event); 
+                setTimeout(function() {
+                    self.reconnectUser();
+                }, 5000)
             };
         });
     }
@@ -84,6 +129,7 @@ class ChatMessagesManager extends EventEmitter {
         }
 
         if(this.isReconnectMessage(message)){
+            this.reconnectUser();
             this.emit(EVENT_RECONNECT, message);   
         }
 
@@ -104,7 +150,7 @@ class ChatMessagesManager extends EventEmitter {
                 this.pendingMessages.delete(message.params.uuid);
             }
             else{
-                this.messages.set(message.params.uuid,message)
+                this.messages.set(message.params.uuid,message);
             }
             this.emit(EVENT_TEXT_MESSAGE, message.params);  
         }
@@ -152,8 +198,13 @@ class ChatMessagesManager extends EventEmitter {
         return this.messageId++;
     }
 
-    joinUser(userId, userName, roomName){
-        let joinMessage = { 
+    joinRoom(userId, userName, roomName){
+        this.userId = userId; 
+        this.roomName = roomName;
+        this.userName = userName;
+
+        let id = this.getNewId()
+        let joinRoomMessage = { 
             jsonrpc: JSONRPC_VERSION,
             method: METHOD_JOIN_ROOM,
             params: {
@@ -161,69 +212,46 @@ class ChatMessagesManager extends EventEmitter {
                 roomName: roomName,
                 userName: userName,
             },
-            id: this.getNewId()
+            id: id
         }
-        this.writeMessageIntoWebSocket(JSON.stringify(joinMessage));
-    }
-
-    reconnectUser(userId, userName, roomName, sessionId){
-        let reconnectMessage = {
-              jsonrpc: JSONRPC_VERSION,
-              method: METHOD_RECONNECT,
-              params: {
-                sessionId: sessionId,
-                userId: userId, 
-                roomName: roomName,
-                userName: userName,
-                lastMessageId: this.getlastMessageId()
-              },
-              id: this.getNewId()
-        }
-        this.writeMessageIntoWebSocket(JSON.stringify(reconnectMessage));
+        this.serviceMessages.set(id,joinRoomMessage);
+        this.writeMessageIntoWebSocket(joinRoomMessage);
     }
 
 
-    getlastMessageId(){
-        for (var message of this.chatmessages.entries()) {
-          if (message[1]["_id"]!=null) return message[1]["_id"];
-        }
-        return null;
-      }
-
-    sendTextMessage(roomName, userId, userName, messageText){
+    sendTextMessage(messageText){
         let messageUUID = uuid.v4();
+        let id = this.getNewId()
         let textMessage = { 
             jsonrpc: JSONRPC_VERSION,
             method: METHOD_TEXT_MESSAGE,
             params: {
-                userId: userId,
-                roomName: roomName,
-                userName: userName,
+                userId: this.userId,
+                roomName: this.roomName,
+                userName: this.userName,
                 text: messageText,
                 ack: false,
                 uuid: messageUUID,
                 date: new Date()
             },
-            id: this.getNewId()
+            id: id
         }
         this.messages.set(messageUUID,textMessage);
         this.pendingMessages.set(messageUUID,textMessage);
-        this.writeMessageIntoWebSocket(JSON.stringify(textMessage));
+        this.sendPendingMessages();
     }
 
     sendPendingMessages(){
-        console.log("Sending pending messages...");
-        for (var message of this.pendingMessages.entries()) {
-            writeMessageIntoWebSocket(message);
+        for (const [key, value] of this.pendingMessages) {
+            this.writeMessageIntoWebSocket(value);
         }
     }
 
     writeMessageIntoWebSocket(message){
         if (this.isOpenedWebSocket()){
-            this.webSocket.send(message);
+            this.webSocket.send(JSON.stringify(message));
         }
     }
-
 }
 
 module.exports = ChatMessagesManager;

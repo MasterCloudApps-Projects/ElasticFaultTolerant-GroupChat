@@ -3,6 +3,15 @@
 Javascript module to manage messages between frontend and test apps and chat server.
 Originally design for the [Elastic & FaultTolerant GroupChat Application.](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat)
 
+
+## Changelog
+Current Version: 3.0.0 - Release 2020-10-18
+
+* Refactor to make the same code work seamlessly on Node.js and the browser.
+* Refactor to use isomorphic-ws module.
+* Auto-reconnect to server when an error ocurred.
+* Update documentation.
+
 ## Installation
 
   ```shell
@@ -27,7 +36,7 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
   
     // suscribe to textMessage event:
     chatMessagesManager.on('textMessage',(message) => {
-      console.log(data.userName + " say: " + data.text)
+      console.log(message.userName + " say: " + message.text)
     });
 
     // suscribe to new users notificacion event:
@@ -49,7 +58,7 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
     chatMessagesManager.joinUser(TEST_USERID, TEST_USERNAME, TEST_ROOMNAME);
 
 	// send messages to the room
-    chatMessagesManager.sendTextMessage(TEST_ROOMNAME, TEST_USERID, TEST_USERNAME, "Hello World!);
+    chatMessagesManager.sendTextMessage("Hello World!);
   
   ```
 
@@ -74,6 +83,10 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
 | url       |     String      | The url where the server publish the websoket |
 | webSocket |     WebSocket      |   The websocket created with the url |
 | messageId | Int(1) |    Index for the messages sent |
+| sessionId | uuid.v4() | Unique identifier for the connection |
+| userId   |     String      | The userId | 
+| roomName |     String      | The name of the room |
+| userName |     String      | The name of the user |
 | messages | Map() |    Map to store messasges in chat|
 | serviceMessages | Map() |    Map to store service messasges |
 | pendingMessages | Map() |    Map to store service messasges |
@@ -88,6 +101,7 @@ The ChatMessagesManager emmit events:
 
 | Event (String)  |      Data    |  Description |
 |-----------|:----------|:------|
+|EVENT_CONNECTED (connected)|null|Websocket connected|
 |EVENT_ERROR (error)|Error Message|Error ocurred|
 |EVENT_RESPONSE (response)|Response|The response for a previous sent message, identified by id.|
 |EVENT_ONCLOSE (closedConnection)|Close connection Notification|Notification for a closed connection.|
@@ -292,7 +306,7 @@ https://www.jsonrpc.org/specification
 
 -  **reconnectUser**(userId, userName, roomName, sessionId) Send reconnect message with userId, userName, roomName and sessionId params.
 
--  **sendTextMessage**(roomName, userId, userName, messageText) Send text message with userId, userName, roomName and the text of the message.
+-  **sendTextMessage**(messageText) Send text message with userId, userName, roomName and the text of the message.
 
 -  **getMessages**() return all the messages (received and sent)
 
