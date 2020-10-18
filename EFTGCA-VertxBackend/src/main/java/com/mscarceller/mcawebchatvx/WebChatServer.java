@@ -118,6 +118,7 @@ public class WebChatServer extends AbstractVerticle {
                             break;
                             case TEXT_MESSAGE:
                                 // If message, push it into the event bus, into the specific room
+                                message.put("params", message.getJsonObject("params").put("ack",true));
                                 System.out.println("Publishing message into the event bus: " + message.toString());
                                 persistMessageToDB(message);
                                 vertx.eventBus().publish(message.getJsonObject("params").getString("roomName"), message);
@@ -178,6 +179,7 @@ public class WebChatServer extends AbstractVerticle {
 
         System.out.println("User register...");
 
+        int messageId = message.getInteger("id");
         String userId = message.getJsonObject("params").getString("userId");
         String roomName = message.getJsonObject("params").getString("roomName");
         String userName = message.getJsonObject("params").getString("userName");
