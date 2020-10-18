@@ -5,11 +5,12 @@
     </p-header>
 
         <p-scrollPanel  #scrollChatContainer (ngChange)="scrollToBottom()" [style]="{width: '100%', height: '400px','background-color':'#fff7e6'}">
-            <app-chatmessage *ngFor="let message of chatmessages | keyvalue: asIsOrder" 
-                [userName]="(message.value.params.type!='sent') ? message.value.params.userName : ''"
+            <app-chatmessage *ngFor="let message of this.chatMessagesManager.getMessages() | keyvalue: asIsOrder" 
+                [userName]="(message.value.params.userName!=this.userName) ? message.value.params.userName : ''"
                 [text]="message.value.params.text"
                 [date]="message.value.params.date"
                 [type]="message.value.params.type"
+                [sent]="(message.value.params.userName==this.userName) ? 'sent' : 'received'"
                 [ack]="message.value.params.ack"
             ></app-chatmessage>
         </p-scrollPanel>

@@ -8,6 +8,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class ChatmessageComponent implements OnInit {
 
   @Input() type: string;
+  @Input() sent: string;
   @Input() ack: boolean;
   @Input() userName: string;
   @Input() text: string;
@@ -25,7 +26,7 @@ export class ChatmessageComponent implements OnInit {
   }
 
   getColor(){
-    if (this.type=="sent")
+    if (this.sent=="sent")
       return "#cce6ff";
     else
       return "#ffffff";
@@ -36,7 +37,7 @@ export class ChatmessageComponent implements OnInit {
   }
 
   isSent(){
-    if (this.type=="sent")
+    if (this.sent=="sent")
       return this.ack;
     else
       return null;

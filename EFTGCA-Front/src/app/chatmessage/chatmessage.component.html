@@ -3,7 +3,7 @@
     <div style="width:100%">{{text}}</div>
 </div>
 
-<div *ngIf="!isSystemMessage()" class="message {{type}}">
+<div *ngIf="!isSystemMessage()" class="message {{sent}}">
     <p-card subheader="{{userName}}" [style]="{'width': '100%','color':getUserNameColor(), 'background-color':getColor()}" styleClass="ui-card-shadow">
         <div style="color:black">{{text}}</div>
         <p-footer>
