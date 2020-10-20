@@ -43,7 +43,110 @@ All of this elements are deploy on a Kubernetes cluster and all are described in
 
 ## 2. Application Description
 
-This chapter describes the basic processes in the application, such a login process o messages sending:
+This chapter describes the basic elements and processes in the application, such load config, login process o messages sending:
+
+The basic structure of the backend application is:
+
+![](../Documents/images/vertx1.png)
+
+Each node has a server verticle instance. This server verticle expose and listen for incoming users request. When a valid join request is received te server verticle create a new Client verticle and subscribe it to the event bus.
+
+When an user send a new message through the websocket the server publish it into the Event Bus, and all the clients subscribed to it can get it and send to their users writing it into the websocket.
+
+
+
+- #### First of all: loading Application config.
+
+  As the backend is deployed over Kubernetes we use the Kubernetes config map (see [Kubernetes architecture elements](#k8s) section), that  can be loaded with Vert.x with this code:
+
+```java
+		//config store options for retrive the config option setted in K8s manifest 
+		ConfigStoreOptions store = new ConfigStoreOptions()
+            .setType("configmap")
+            .setConfig(new JsonObject()
+                .put("namespace", "mscarceller")
+                .put("name", "eftgca-backvertx-configmap")
+            );
+    
+        ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().addStore(store));
+
+        retriever.getConfig(ar -> {
+            if (ar.failed()) {
+                System.out.println("Error retriving configuration properties");
+            } else {
+              JsonObject config = ar.result();
+              this.maxMessagesHistory = config.getInteger("maxMessagesHistory");
+            }
+        });
+```
+
+
+
+- #### Create a Hazelcast Cluster for users:
+
+In order to share the users connected between all the backend instances we use a Hazelcast cluster:
+
+```java
+    // Setting and init shared webchatClients Map
+    Set<HazelcastInstance> instances = Hazelcast.getAllHazelcastInstances();
+    HazelcastInstance hz = instances.stream().findFirst().get();
+    webChatClients = hz.getMap("users");
+```
+
+
+
+- #### Create a DB instance to persist the messages:
+
+```java
+   JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://mongodb:27017").put("db_name","webchat")
+   mongoDBclient = MongoClient.createShared(vertx, mongoconfig, "WebchatDBPool");
+```
+
+​		**NOTE**:  we use *"mongodb://mongodb:27017"* where second *mongodb* is the name of the kubernetes node for our mongodb instance.
+
+
+
+- #### **Subscribe the server to EventBus:**
+
+The server need to be subscribed to some events into the event bus:
+
+```java
+// Listen for disconected users event
+   vertx.eventBus().consumer("delete.user", data -> {
+      JsonObject userData = new JsonObject(data.body().toString());
+      System.out.println("Someone has notified for deleting user");
+      deleteClient(userData.getString("roomName"),userData.getString("userId"));
+   });
+
+// Listen for reconnect users of a destroyed pod
+   vertx.eventBus().consumer("reconnect.users", data -> {
+       System.out.println("Someone has notified in EventBus that is shutting down...");
+   });
+
+// Listen for new servers in cluster
+   vertx.eventBus().consumer("new.server", data -> {
+       System.out.println("New server available");
+   });
+```
+
+
+
+* #### **Prepare server for shutting down**
+
+When a node is going to shutdown (because a scale-down), the server publish an event into the event bus to request the users to reconncet to another instance. This is made by using hooks:
+
+```java
+	Runtime.getRuntime().addShutdownHook(new Thread() {
+                @Override
+                public void run() {
+                    Request reconnectRequest = new Request(Method.RECONNECT.getDescription(),null, getNewId());
+                    System.out.println("I'm shutting down.");
+                    vertx.eventBus().publish("reconnect.users", "");
+                    serverWebSocket.writeFinalTextFrame(reconnectRequest.toString());
+                    System.out.println("Shutting down notify in event bus. Someone reconnect my users");
+                }
+            });
+```
 
 
 
@@ -127,9 +230,33 @@ This chapter describes the basic processes in the application, such a login proc
   <img width="680" src=../Documents/images/uml_reconnect.png>
 </p>
 
+
+The messages are getted with *sendLastMessagesInRoom* function:
+
+```java
+	private void sendLastMessagesInRoom(String roomName, ServerWebSocket serverWebSocket, String lastMessageId){
+        System.out.println("Sending last messages (after " + lastMessageId + ") for the new user in room!");
+        JsonObject query = new JsonObject().put("params.roomName", roomName);
+        if(lastMessageId != null)
+            query.put("id","{ $gt: "+lastMessageId+" }");
+        FindOptions options = new FindOptions();
+        options.setLimit(this.maxMessagesHistory);
+        mongoDBclient.findWithOptions("messages", query, options, res -> {
+            if (res.succeeded()) {
+                for (JsonObject message : res.result()) {
+                    serverWebSocket.writeFinalTextFrame(message.toString());
+                }
+            }
+        });
+    }
+```
+
+
+
 ---
 
 <a name="k8s"></a>
+
 ## 3. Kubernetes architecture elements
 
 
@@ -153,7 +280,28 @@ metadata:
 To create it run next command inside k8s folder:
 
 ```shell
-kubectl create -f ./namespace.yaml
+> kubectl create -f ./namespace.yaml
+```
+
+
+
+We also provide *configmap* set for the application. Use the file *configmap.yaml*  inside k8s folder which contains some configurable options for the backend:
+
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eftgca-backvertx-configmap
+  namespace: mscarceller
+data:
+  host: "webchat-mscarceller.cloud.okteto.net"
+  maxMessagesHistory: '100'
+```
+
+To create it run next command inside k8s folder:
+
+```shell
+> kubectl create -f ./*configmap.yaml
 ```
 
 
