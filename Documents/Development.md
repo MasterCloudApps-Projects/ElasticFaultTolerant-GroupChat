@@ -3,7 +3,7 @@
 
 
 1. [Backend](#backend)
-2. [Message Library](#okteto)
+2. [Message Library](#messagelib)
 3. [Testing the backend](#testing)
 4. [Angular frontend application](#front)
 5. [CI/CD with GitHub Actions](#actions)
@@ -44,7 +44,7 @@ You can find some test examples of testing scripts in the [EFTGCA-VertxAppTests]
 
 ---
 
-<a name="frontend"></a>
+<a name="front"></a>
 
 ## 4. Angular frontend application
 
