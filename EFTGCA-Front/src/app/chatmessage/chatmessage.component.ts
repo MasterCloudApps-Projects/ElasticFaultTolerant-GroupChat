@@ -1,4 +1,5 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-chatmessage',
@@ -8,13 +9,14 @@ import { Component, OnInit, Input } from '@angular/core';
 export class ChatmessageComponent implements OnInit {
 
   @Input() type: string;
+  @Input() method: string;
   @Input() sent: string;
   @Input() ack: boolean;
   @Input() userName: string;
-  @Input() text: string;
+  @Input() text: any;
   @Input() date: Date;
 
-  constructor() { 
+  constructor(private domSanitizer: DomSanitizer) { 
 
   }
 
@@ -25,6 +27,14 @@ export class ChatmessageComponent implements OnInit {
     return (this.type == "system")
   }
 
+  isImageMessage(){
+    return (this.method == "imageMessage")
+  }
+
+  getImgBase64() {
+     return this.domSanitizer.bypassSecurityTrustUrl('data:image/png;base64,' + this.text);
+  }
+  
   getColor(){
     if (this.sent=="sent")
       return "#cce6ff";

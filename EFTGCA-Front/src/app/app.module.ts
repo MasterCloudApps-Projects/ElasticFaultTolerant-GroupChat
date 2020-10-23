@@ -2,6 +2,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from "@angular/common/http";
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -14,6 +15,9 @@ import { CardModule } from 'primeng/card';
 import { DialogModule } from 'primeng/dialog';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule} from 'primeng/inputtext';
+import { OverlayPanelModule } from 'primeng/overlaypanel';
+import { FileUploadModule } from 'primeng/fileupload';
+
 import { CanDeactivateGuard } from './guards/candeactivateguard';
 
 @NgModule({
@@ -23,9 +27,10 @@ import { CanDeactivateGuard } from './guards/candeactivateguard';
     ChatmessageComponent
   ],
   imports: [
+    HttpClientModule,
     BrowserModule,BrowserAnimationsModule,FormsModule,
     AppRoutingModule,
-    PanelModule,ScrollPanelModule,CardModule,DialogModule,ButtonModule,InputTextModule
+    PanelModule,ScrollPanelModule,CardModule,DialogModule,ButtonModule,InputTextModule,OverlayPanelModule,FileUploadModule
   ],
   schemas: [ CUSTOM_ELEMENTS_SCHEMA ],
   providers: [CanDeactivateGuard],
