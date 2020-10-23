@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Set;
 import java.util.List;
 import java.util.Iterator;
-
+import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
+
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,18 +20,24 @@ import com.mscarceller.mcawebchatvx.model.messages.Notification;
 import com.mscarceller.mcawebchatvx.model.messages.Request;
 import com.mscarceller.mcawebchatvx.model.messages.SuccessResponse;
 
+
 import org.json.JSONException;
 
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
+import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
+import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
+import io.vertx.ext.web.handler.BodyHandler;
+import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.config.ConfigStoreOptions;
@@ -48,11 +55,11 @@ public class WebChatServer extends AbstractVerticle {
     private int messageId;
 
     @Override
-    public void start() {
-        startServer(vertx);
+    public void start(Future<Void> fut) {
+        startServer(vertx,fut);
     }
 
-    private void startServer(Vertx vertx) {
+    private void startServer(Vertx vertx,Future<Void> fut) {
 
         ConfigStoreOptions store = new ConfigStoreOptions()
             .setType("configmap")
@@ -72,7 +79,10 @@ public class WebChatServer extends AbstractVerticle {
             }
         });
 
-        server = vertx.createHttpServer();
+        HttpServerOptions httpServerOptions = new HttpServerOptions();
+        httpServerOptions.setMaxWebsocketFrameSize(1024*1024);
+        server = vertx.createHttpServer(httpServerOptions);
+        
         messageHandler = new MessageHandler();
         messageId = 1;
 
@@ -95,6 +105,66 @@ public class WebChatServer extends AbstractVerticle {
 
         // Notify New Server into the event Bus   ->    useless only for test the bus    -> CAN BE DELETE AFTER INITIAL TESTS
         vertx.eventBus().publish("new.server", "");
+
+
+        // Create a router object.
+        Router router = Router.router(vertx);
+
+
+        Set<String> allowedHeaders = new HashSet<>();
+        allowedHeaders.add("x-requested-with");
+        allowedHeaders.add("Access-Control-Allow-Origin");
+        allowedHeaders.add("origin");
+        allowedHeaders.add("Content-Type");
+        allowedHeaders.add("accept");
+
+        Set<HttpMethod> allowedMethods = new HashSet<>();
+        allowedMethods.add(HttpMethod.GET);
+        allowedMethods.add(HttpMethod.POST);
+        allowedMethods.add(HttpMethod.DELETE);
+        allowedMethods.add(HttpMethod.PATCH);
+        allowedMethods.add(HttpMethod.OPTIONS);
+        allowedMethods.add(HttpMethod.PUT);
+
+        router.route().handler(CorsHandler.create("*").allowedHeaders(allowedHeaders).allowedMethods(allowedMethods));
+        router.route().handler(BodyHandler.create());
+
+        router.post("/images").handler(routingContext -> {
+           // System.out.println(routingContext.getBodyAsString());
+            JsonObject message = new JsonObject(routingContext.getBodyAsString());
+            message.put("params", message.getJsonObject("params").put("ack",true));
+            persistMessageToDB(message);
+            message.put("params", message.getJsonObject("params").put("base64ImgString",""));
+            System.out.println("Publishing message into the event bus: " + message.toString());
+            vertx.eventBus().publish(message.getJsonObject("params").getString("roomName"), message);
+            System.out.println("Message in event bus: " + message.toString());
+            routingContext.response().setStatusCode(200).end();
+        });
+
+        router.get("/images/:uuid").handler(routingContext -> {
+            String uuid = routingContext.request().getParam("uuid");
+            System.out.println("Claim form image: " + uuid);
+            JsonObject query = new JsonObject().put("params.uuid", uuid);
+            mongoDBclient.findOne("messages", query, null, res -> {
+                if (res.succeeded()) {
+                    if (res.result()!=null){
+                        routingContext.response()
+                        .setStatusCode(200)
+                        .putHeader("Access-Control-Allow-Origin", "*")
+                        .putHeader("content-type", "application/json; charset=utf-8")
+                        .end(res.result().toString());
+                    }
+                    else{
+                        routingContext.response().setStatusCode(204).end();
+                    }      
+                }
+                else{
+                    routingContext.response().setStatusCode(500).end();  
+                } 
+            });  
+        });
+
+        server.requestHandler(router::accept);
 
         // Init the websocket handler
         server.webSocketHandler((serverWebSocket) -> {
@@ -124,6 +194,7 @@ public class WebChatServer extends AbstractVerticle {
                                 vertx.eventBus().publish(message.getJsonObject("params").getString("roomName"), message);
                                 System.out.println("Message in event bus: " + message.toString());
                             break;
+
                             default:
                                 System.out.println("Incoming message received in server: unknown format");
                             break;
@@ -134,6 +205,10 @@ public class WebChatServer extends AbstractVerticle {
                         e.printStackTrace();
                     }
 
+                }).exceptionHandler((e) -> {
+                    System.out.println("Closed by error: " + e);
+                }).closeHandler((__) -> {
+                    System.out.println("Closed");
                 });
             }
             else{
@@ -282,6 +357,7 @@ public class WebChatServer extends AbstractVerticle {
             query.put("id","{ $gt: "+lastMessageId+" }");
         FindOptions options = new FindOptions();
         options.setLimit(this.maxMessagesHistory);
+        options.setSort(new JsonObject().put("params.date",1));
         mongoDBclient.findWithOptions("messages", query, options, res -> {
             if (res.succeeded()) {
                 for (JsonObject message : res.result()) {

@@ -6,7 +6,8 @@ public enum Method {
     RECONNECT("reconnect"),
     NOTIFY("notify"),
     NEW_USER("newUser"),
-    TEXT_MESSAGE("textMessage");
+    TEXT_MESSAGE("textMessage"),
+    IMAGE_MESSAGE("imageMessage");
 
     private String description;
 
