@@ -5,7 +5,8 @@
 export const environment = {
   production: false,
 
-  CHAT_URL : "ws://localhost:8080/chat"
+  CHAT_URL : "ws://localhost:8080/chat",
+  CHAT_IMAGES_URL: "http://localhost:8080"
 
 };
 
