@@ -351,6 +351,10 @@ spec:
           backend:
             serviceName: webchat      
             servicePort: 8080
+        - path: /images
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
 ```
 
 It redirect the incoming traffic on *http://webchat-mscarceller.cloud.okteto.net/chat* to the service webchat on port 8080.
