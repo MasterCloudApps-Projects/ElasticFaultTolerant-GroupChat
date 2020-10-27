@@ -3031,3 +3031,10 @@ EFTGCA-MessagesLib/node_modules/ws/lib/stream.js
 EFTGCA-MessagesLib/node_modules/ws/lib/validation.js
 EFTGCA-MessagesLib/node_modules/ws/lib/websocket-server.js
 EFTGCA-MessagesLib/node_modules/ws/lib/websocket.js
+EFTGCA-Front/package-lock.json
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/browser.js
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/index.d.ts
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/LICENSE
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/node.js
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/package.json
+EFTGCA-VertxAppTests/node_modules/isomorphic-ws/README.md
