@@ -61,7 +61,7 @@ export class ChatComponent implements OnInit {
 
   constructor() {
 
-    this.chatMessagesManager = new ChatMessagesManager(environment.CHAT_URL);
+    this.chatMessagesManager = new ChatMessagesManager(environment.CHAT_URL, environment.CHAT_IMAGES_URL);
 
     this.chatMessagesManager.on('connected',() => {
       console.log("Connected");
@@ -91,6 +91,13 @@ export class ChatComponent implements OnInit {
     });
 
     this.chatMessagesManager.on('textMessage',(message) => {
+      if (message.roomName != this.roomName){
+        return;
+      }
+      setTimeout(() => this.scrollToBottom(), 125);
+    });
+
+    this.chatMessagesManager.on('imageMessage',(message) => {
       if (message.roomName != this.roomName){
         return;
       }
@@ -157,8 +164,21 @@ export class ChatComponent implements OnInit {
       }
     }
   
-    asIsOrder(a, b) {
-      return 1;
+
+    valueAscOrder(a, b) {
+      return (new Date(a.value.params.date) > new Date(b.value.params.date)) ? 1 : -1;
+    }
+
+    getStatusColor(){
+      if (this.chatMessagesManager.isOpeningWebSocket()){
+        return "orange";
+      }
+      else if (this.chatMessagesManager.isOpenedWebSocket()){
+        return "green";
+      }
+      else{
+        return "red";
+      }
     }
 
     scrollToBottom(): void {
@@ -208,6 +228,15 @@ export class ChatComponent implements OnInit {
     showUserNameInput(){
       this.userName = "";
       this.displayUserDialog = true;
+    }
+
+    handleImageInput(event: any){
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => {
+          this.chatMessagesManager.sendImageMessage(reader.result.toString().replace(/^[^,]+, */, ''));
+      };
     }
 
 }

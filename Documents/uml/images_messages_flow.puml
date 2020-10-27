@@ -1,0 +1,26 @@
+@startuml
+
+title "Images Messages - Sequence Diagram"
+
+actor "User 1\n(messages library)"
+actor "User 2\n(messages library)"
+participant "Server\n(Server Verticle)"
+participant "Server\n(Client Verticle)"
+participant "EventBus"
+database "messages MongoDB"
+
+
+"User 1\n(messages library)" -> "Server\n(Server Verticle)" : send Image Message (API Rest POST)
+"Server\n(Server Verticle)" -> "messages MongoDB" : store message into DB
+"Server\n(Server Verticle)" -> "EventBus" : publish message
+
+
+
+"EventBus" -> "Server\n(Client Verticle)" : read image message
+"Server\n(Client Verticle)" -> "User 2\n(messages library)" : read image message
+
+"User 2\n(messages library)" -> "Server\n(Server Verticle)" : claim for Image (API Rest GET)
+"Server\n(Server Verticle)" <- "messages MongoDB" : get message from DB
+"Server\n(Server Verticle)" -> "User 2\n(messages library)" : send Image
+
+@enduml

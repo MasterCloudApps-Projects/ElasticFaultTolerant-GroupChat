@@ -24,15 +24,16 @@ public class MessageHandler {
             System.out.println("Incoming message decoded: " + Method.TEXT_MESSAGE);
             return Method.TEXT_MESSAGE;
         }
+        else if(jsonMessage.getString("method").equalsIgnoreCase("imageMessage")){
+            System.out.println("Incoming image decoded: " + Method.IMAGE_MESSAGE);
+            return Method.IMAGE_MESSAGE;
+        }
         else if(jsonMessage.getString("method").equalsIgnoreCase("reconnect")){
             System.out.println("Incoming message decoded: " + Method.RECONNECT);
             return Method.RECONNECT;
         }
         else{
             return null;
-        }
-            
+        }         
     }
-
-
 }

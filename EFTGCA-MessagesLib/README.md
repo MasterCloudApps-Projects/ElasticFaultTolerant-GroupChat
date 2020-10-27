@@ -5,12 +5,11 @@ Originally design for the [Elastic & FaultTolerant GroupChat Application.](https
 
 
 ## Changelog
-Current Version: 3.0.0 - Release 2020-10-18
+Current Version: 3.1.0 - Release 2020-10-27
 
-* Refactor to make the same code work seamlessly on Node.js and the browser.
-* Refactor to use isomorphic-ws module.
-* Auto-reconnect to server when an error ocurred.
-* Update documentation.
+* Images messages type available
+
+  
 
 ## Installation
 
@@ -37,6 +36,11 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
     // suscribe to textMessage event:
     chatMessagesManager.on('textMessage',(message) => {
       console.log(message.userName + " say: " + message.text)
+    });
+
+    // suscribe to imageMessage event:
+    chatMessagesManager.on('imageMessage',(imageMessage) => {
+      console.log(message)
     });
 
     // suscribe to new users notificacion event:
@@ -84,7 +88,7 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
 | webSocket |     WebSocket      |   The websocket created with the url |
 | messageId | Int(1) |    Index for the messages sent |
 | sessionId | uuid.v4() | Unique identifier for the connection |
-| userId   |     String      | The userId | 
+| userId   |     String      | The userId |
 | roomName |     String      | The name of the room |
 | userName |     String      | The name of the user |
 | messages | Map() |    Map to store messasges in chat|
@@ -108,7 +112,7 @@ The ChatMessagesManager emmit events:
 |EVENT_NEW_USER (newUser)|New user Notification|Notify  new user in room|
 |EVENT_RECONNECT (reconnect)|Reconnect notification message|Reconnection notification|
 |EVENT_TEXT_MESSAGE (textMessage)|Text Message|Notify new text message in room|
-
+|EVENT_IMAGE_MESSAGE (imageMessage)|Image Message|Notify new image message in room|
 ---
 
 
@@ -266,7 +270,38 @@ https://www.jsonrpc.org/specification
     "id": 2
   }
   ```
+* **Image message**: user want to send a text message:
 
+  Client Message
+
+  ```json
+  {
+    "jsonrpc": "2.0",
+    "method": "textMessage",
+    "params": {
+      "userId": "xxxxxxxxxxxxx",
+      "roomName": "Room 1",
+      "userName": "User 1",
+      "base64ImgString": "This is the imageBase64 string",
+      "ack": false,
+      "uuid": "8475234jh62356580672306",
+      "date": "01/01/2020 10:12:32"
+    },
+    "id": 2
+  }
+  ```
+
+  Server Response
+
+  ```json
+  {
+    "jsonrpc": "2.0",
+    "result": {
+      "status": "OK",
+      },
+    "id": 2
+  }
+  ```
 * **System/Server Message**: the server send system messages to a user also to be shown on the chat
 
   Server Notification example
@@ -303,15 +338,11 @@ https://www.jsonrpc.org/specification
 
 
 - **joinUser**(userId, userName, roomName) Send joinRomm message with userId, userName, and roomName params.
-
--  **reconnectUser**(userId, userName, roomName, sessionId) Send reconnect message with userId, userName, roomName and sessionId params.
-
--  **sendTextMessage**(messageText) Send text message with userId, userName, roomName and the text of the message.
-
--  **getMessages**() return all the messages (received and sent)
-
--  **getServiceMessages**() return the service messages
-
+- **reconnectUser**(userId, userName, roomName, sessionId) Send reconnect message with userId, userName, roomName and sessionId params.
+- **sendTextMessage**(messageText) Send text message with userId, userName, roomName and the text of the message.
+- **sendImageMessage**(base64ImgString) Send image message with userId, userName, roomName and the base64 string  of the image.
+- **getMessages**() return all the messages (received and sent)
+- **getServiceMessages**() return the service messages
 -  **getPendingMessages**() return all the messages that have been sent but no ack received.
 
 ---
