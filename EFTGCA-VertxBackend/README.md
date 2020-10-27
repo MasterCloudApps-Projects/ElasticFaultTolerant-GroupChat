@@ -49,9 +49,11 @@ The basic structure of the backend application is:
 
 ![](../Documents/images/vertx1.png)
 
-Each node has a server verticle instance. This server verticle expose and listen for incoming users request. When a valid join request is received te server verticle create a new Client verticle and subscribe it to the event bus.
+Each node has a server verticle instance. This server verticle expose and listen for incoming users request. When a valid join request is received the server verticle create a new Client verticle and subscribe it to the event bus.
 
 When an user send a new message through the websocket the server publish it into the Event Bus, and all the clients subscribed to it can get it and send to their users writing it into the websocket.
+
+When an user send an image message through the API Rest (Post action) the server process it like a text message and send an notification to the other users using the event bus. When the clients receive this notification claim for the image using the API Rest (GET action) and download the image message.
 
 
 
@@ -180,7 +182,7 @@ When a node is going to shutdown (because a scale-down), the server publish an e
 <p align="center">
     <img width="400" src="../Documents/images/uml_joinRoom.png">
 </p>
-​		When all this conditions are satisfied, the server register the user creating a client verticle and subscribing it into the event bus as a consumer:
+​		When all this conditions are satisfied, the server register the user creating a client verticle and subscribing it into the event 		bus as a consumer:
 
 ```java
 	private void startClient(Vertx vertx) {
@@ -203,7 +205,7 @@ When a node is going to shutdown (because a scale-down), the server publish an e
 
 
 
-* #### Sending and receiving messages:
+* #### Sending and receiving text messages:
 
   As we have mentioned above, when an user send a message to the application, the server publish it into the event bus, and all the clients, that are subscribed to it, consume the message and sent it to the users through the websocket. 
 
@@ -213,7 +215,25 @@ When a node is going to shutdown (because a scale-down), the server publish an e
     <img width="560" src=../Documents/images/uml_sendTextMessage.png>
   </p>
 
+
+
+
+* #### Sending and receiving image messages:
+
+  As we have mentioned above, when an user send a image message to the application, in order to not collapse the websocket the library really send the message through an API rest published by the server. It get the message with the base64 image string and store into the MongoDB and send a message to the other users using the Event Bus in the same way that it does with text messages. When the clients, receive this kind of messages claim for the image through the API Rest.
+
+  The basic flow:
+
   
+
+<p align="center">
+  <img width="700" src=../Documents/images/uml_sendImageMessage.png>
+</p>
+
+
+
+
+
 * #### Error and retry process flow:
 
   When an error occurred sending message the user don't receive the ack message and can try to send it again. 
