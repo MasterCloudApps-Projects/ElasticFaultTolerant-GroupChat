@@ -101,6 +101,10 @@ spec:
           backend:
             serviceName: webchat      
             servicePort: 8080
+        - path: /files
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
 
 ---
 apiVersion: v1
