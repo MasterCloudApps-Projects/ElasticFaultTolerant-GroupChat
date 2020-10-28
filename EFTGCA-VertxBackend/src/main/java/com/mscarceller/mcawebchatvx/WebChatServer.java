@@ -157,7 +157,8 @@ public class WebChatServer extends AbstractVerticle {
                 JsonObject message = new JsonObject(attributes.get("message"));
                 message.put("params", message.getJsonObject("params").put("ack",true));
 
-                fs.move(files.iterator().next().uploadedFileName(), "files/" + message.getJsonObject("params").getString("uuid") , new CopyOptions().setAtomicMove(true), result -> {
+                fs.move(files.iterator().next().uploadedFileName(), "file-uploads/" + message.getJsonObject("params").getString("uuid") , new CopyOptions().setAtomicMove(true), result -> {
+                    System.out.println(result);
                     persistMessageToDB(message); 
                     message.put("params", message.getJsonObject("params").put("fileContents",""));
                     System.out.println("Publishing message into the event bus: " + message.toString());
@@ -207,7 +208,7 @@ public class WebChatServer extends AbstractVerticle {
                         .putHeader("Content-Type", "multipart/form-data")
                         .putHeader("Content-Disposition", "attachment; filename=\""+message.getJsonObject("params").getString("fileName")+"\"")
                         .putHeader("Transfer-Encoding", "chunked")
-                        .sendFile("files/"+uuid).end();
+                        .sendFile("file-uploads/" + uuid).end();
                     }
                     else{
                         routingContext.response().setStatusCode(204).end();
