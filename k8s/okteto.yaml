@@ -22,30 +22,11 @@ data:
 ---
 
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: eftgca-backvertx-pv-volume
-  namespace: mscarceller
-  labels:
-    type: local
-spec:
-  storageClassName: manual
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: "/mnt/data"
-
----
-
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: eftgca-backvertx-pv-claim
   namespace: mscarceller
 spec:
-  storageClassName: manual
   accessModes:
     - ReadWriteOnce
   resources:
