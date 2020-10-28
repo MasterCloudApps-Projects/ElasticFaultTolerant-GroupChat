@@ -19,7 +19,7 @@
 <div *ngIf="isFileMessage()" class="message {{sent}}">
     <p-card subheader="{{userName}}" [style]="{'width': '100%','color':getUserNameColor(), 'background-color':getColor()}" styleClass="ui-card-shadow">
         <div style="color:black">
-            <a href="http://localhost:8080/files/{{uuid}}" download>
+            <a href="{{urlAPIRest}}/files/{{uuid}}" download>
                 <i class="pi pi-download" style="color: green; cursor:pointer"></i>
             </a>
             &nbsp;&nbsp;<b>{{text}}</b></div>
