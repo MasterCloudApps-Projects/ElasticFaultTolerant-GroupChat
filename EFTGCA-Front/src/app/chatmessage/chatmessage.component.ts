@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../environments/environment';
+
 
 @Component({
   selector: 'app-chatmessage',
@@ -18,11 +20,14 @@ export class ChatmessageComponent implements OnInit {
   @Input() text: any;
   @Input() date: Date;
 
+  urlAPIRest: String;
+
   constructor(private domSanitizer: DomSanitizer, private http: HttpClient) { 
 
   }
 
   ngOnInit(): void {
+    this.urlAPIRest = environment.CHAT_FILES_URL;
   }
 
   isSystemMessage(){
