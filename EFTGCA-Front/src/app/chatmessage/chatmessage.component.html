@@ -3,7 +3,7 @@
     <div style="width:100%">{{text}}</div>
 </div>
 
-<div *ngIf="!isSystemMessage() && !isImageMessage()" class="message {{sent}}">
+<div *ngIf="isTextMessage()" class="message {{sent}}">
     <p-card subheader="{{userName}}" [style]="{'width': '100%','color':getUserNameColor(), 'background-color':getColor()}" styleClass="ui-card-shadow">
         <div style="color:black">{{text}}</div>
         <p-footer>
@@ -16,6 +16,22 @@
     </p-card>
 </div>
 
+<div *ngIf="isFileMessage()" class="message {{sent}}">
+    <p-card subheader="{{userName}}" [style]="{'width': '100%','color':getUserNameColor(), 'background-color':getColor()}" styleClass="ui-card-shadow">
+        <div style="color:black">
+            <a href="http://localhost:8080/files/{{uuid}}" download>
+                <i class="pi pi-download" style="color: green; cursor:pointer"></i>
+            </a>
+            &nbsp;&nbsp;<b>{{text}}</b></div>
+        <p-footer>
+            <div style="text-align: right;">
+                <span style="font-size: 0.8em; color:black">{{date | date: 'dd/MM/yyyy HH:mm:ss'}} &nbsp;</span>
+                <i *ngIf="isSent()===true"  class="pi pi-check" style="font-size: 0.8em; color:green"></i>
+                <i *ngIf="isSent()===false" class="pi pi-clock" style="font-size: 0.8em; color:grey"></i>
+            </div>
+        </p-footer>
+    </p-card>
+</div>
 
 <div *ngIf="isImageMessage()" class="message {{sent}}">
     <p-card subheader="{{userName}}" [style]="{'width': '100%','color':getUserNameColor(), 'background-color':getColor()}" styleClass="ui-card-shadow">

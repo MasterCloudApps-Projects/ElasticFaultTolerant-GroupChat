@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-chatmessage',
@@ -8,6 +9,7 @@ import { DomSanitizer } from '@angular/platform-browser';
 })
 export class ChatmessageComponent implements OnInit {
 
+  @Input() uuid: string;
   @Input() type: string;
   @Input() method: string;
   @Input() sent: string;
@@ -16,7 +18,7 @@ export class ChatmessageComponent implements OnInit {
   @Input() text: any;
   @Input() date: Date;
 
-  constructor(private domSanitizer: DomSanitizer) { 
+  constructor(private domSanitizer: DomSanitizer, private http: HttpClient) { 
 
   }
 
@@ -27,6 +29,14 @@ export class ChatmessageComponent implements OnInit {
     return (this.type == "system")
   }
 
+  isTextMessage(){
+    return (this.method == "textMessage")
+  }
+
+  isFileMessage(){
+    return (this.method == "fileMessage")
+  }
+
   isImageMessage(){
     return (this.method == "imageMessage")
   }
@@ -34,7 +44,7 @@ export class ChatmessageComponent implements OnInit {
   getImgBase64() {
      return this.domSanitizer.bypassSecurityTrustUrl('data:image/png;base64,' + this.text);
   }
-  
+
   getColor(){
     if (this.sent=="sent")
       return "#cce6ff";
@@ -53,7 +63,7 @@ export class ChatmessageComponent implements OnInit {
       return null;
   }
 
-   hashStringToColor(str) {
+  hashStringToColor(str) {
     var hash = 0;
     for (var i = 0; i < str.length; i++) {
       hash = ((hash << 5) + hash) + str.charCodeAt(i); /* hash * 33 + c */
