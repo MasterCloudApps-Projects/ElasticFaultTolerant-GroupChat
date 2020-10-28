@@ -12,7 +12,7 @@ env:
   # TODO: Change variable to your image's name.
   GITHUBREPOSITORY: 'mscarceller'
   IMAGENAME: 'eftgca-backvertx'
-  IMAGETAG: '1.0.0'
+  IMAGETAG: '1.1.0'
 
 jobs:
   build:

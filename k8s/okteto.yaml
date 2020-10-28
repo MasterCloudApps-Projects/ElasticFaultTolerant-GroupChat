@@ -224,7 +224,7 @@ spec:
         persistentVolumeClaim:
           claimName: eftgca-backvertx-pv-claim
       containers:
-      - image: mscarceller/eftgca-backvertx:1.0.0
+      - image: mscarceller/eftgca-backvertx:1.1.0
         imagePullPolicy: Always
         name: webchatbackend
         ports:
@@ -259,7 +259,7 @@ spec:
     spec:
       containers:
         - name: webchatfront
-          image: mscarceller/eftgca-front:0.1.0
+          image: mscarceller/eftgca-front:1.1.0
           imagePullPolicy: Always
           ports:
           - containerPort: 8081
