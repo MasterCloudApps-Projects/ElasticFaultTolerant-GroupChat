@@ -237,6 +237,9 @@ spec:
             cpu: 500m
           requests:
             cpu: 200m
+        volumeMounts:
+          - mountPath: "/app-data"
+            name: webchatbackend-pv-storage
       terminationGracePeriodSeconds: 60
 --- 
 
