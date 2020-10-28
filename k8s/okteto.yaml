@@ -20,6 +20,40 @@ data:
   MONGO_ROOT_PASSWORD: cGFzc3dvcmQK
   
 ---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: eftgca-backvertx-pv-volume
+  namespace: mscarceller
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eftgca-backvertx-pv-claim
+  namespace: mscarceller
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+
+---
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -204,6 +238,10 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
+      volumes:
+      - name: webchatbackend-pv-storage
+        persistentVolumeClaim:
+          claimName: eftgca-backvertx-pv-claim
       containers:
       - image: mscarceller/eftgca-backvertx:1.0.0
         imagePullPolicy: Always
