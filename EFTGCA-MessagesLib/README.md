@@ -5,9 +5,9 @@ Originally design for the [Elastic & FaultTolerant GroupChat Application.](https
 
 
 ## Changelog
-Current Version: 3.1.0 - Release 2020-10-27
+Current Version: 3.2.0 - Release 2020-10-27
 
-* Images messages type available
+* Files messages type available for browser and console
 
   
 
