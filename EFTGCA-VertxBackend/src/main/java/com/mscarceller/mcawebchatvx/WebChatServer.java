@@ -26,6 +26,9 @@ import org.json.JSONException;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
+import io.vertx.core.MultiMap;
+import io.vertx.core.file.FileSystem;
+import io.vertx.core.file.CopyOptions;
 import io.vertx.core.Future;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpMethod;
@@ -38,11 +41,13 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
+import io.vertx.ext.web.FileUpload;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.config.ConfigStoreOptions;
 import io.vertx.config.ConfigRetriever;
 import io.vertx.config.ConfigRetrieverOptions;
+
 
 public class WebChatServer extends AbstractVerticle {
 
@@ -51,6 +56,7 @@ public class WebChatServer extends AbstractVerticle {
     private HttpServer server;
     private MessageHandler messageHandler;
     private int maxMessagesHistory = 50;
+    private FileSystem fs;
 
     private int messageId;
 
@@ -67,6 +73,8 @@ public class WebChatServer extends AbstractVerticle {
                 .put("namespace", "mscarceller")
                 .put("name", "eftgca-backvertx-configmap")
             );
+
+        this.fs = vertx.fileSystem();
     
         ConfigRetriever retriever = ConfigRetriever.create(vertx, new ConfigRetrieverOptions().addStore(store));
 
@@ -92,7 +100,7 @@ public class WebChatServer extends AbstractVerticle {
         webChatClients = hz.getMap("users");
 
         // Setting and init shared mongo DB
-        // JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://localhost:27017").put("db_name","webchat");
+        //JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://localhost:27017").put("db_name","webchat");
         JsonObject mongoconfig = new JsonObject().put("connection_string", "mongodb://mongodb:27017")
                                     .put("db_name","webchat")
                                     .put("username","admin")
@@ -130,7 +138,6 @@ public class WebChatServer extends AbstractVerticle {
         router.route().handler(BodyHandler.create());
 
         router.post("/images").handler(routingContext -> {
-           // System.out.println(routingContext.getBodyAsString());
             JsonObject message = new JsonObject(routingContext.getBodyAsString());
             message.put("params", message.getJsonObject("params").put("ack",true));
             persistMessageToDB(message);
@@ -141,9 +148,33 @@ public class WebChatServer extends AbstractVerticle {
             routingContext.response().setStatusCode(200).end();
         });
 
+        router.post("/files").handler(BodyHandler.create().setUploadsDirectory("files"));
+        router.post("/files").handler(routingContext -> {
+            System.out.println("Incoming File message");
+            Set<FileUpload> files = routingContext.fileUploads();
+            if(!files.isEmpty()){
+                MultiMap attributes = routingContext.request().formAttributes();
+                JsonObject message = new JsonObject(attributes.get("message"));
+                message.put("params", message.getJsonObject("params").put("ack",true));
+
+                fs.move(files.iterator().next().uploadedFileName(), "files/" + message.getJsonObject("params").getString("uuid") , new CopyOptions().setAtomicMove(true), result -> {
+                    persistMessageToDB(message); 
+                    message.put("params", message.getJsonObject("params").put("fileContents",""));
+                    System.out.println("Publishing message into the event bus: " + message.toString());
+                    vertx.eventBus().publish(message.getJsonObject("params").getString("roomName"), message);
+                    System.out.println("Message in event bus: " + message.toString());
+                    routingContext.response().setStatusCode(200).end();
+                });
+            }
+            else{
+                System.out.println("No Files!");
+                routingContext.response().setStatusCode(400).end();
+            }
+        });
+
         router.get("/images/:uuid").handler(routingContext -> {
             String uuid = routingContext.request().getParam("uuid");
-            System.out.println("Claim form image: " + uuid);
+            System.out.println("Claim for image: " + uuid);
             JsonObject query = new JsonObject().put("params.uuid", uuid);
             mongoDBclient.findOne("messages", query, null, res -> {
                 if (res.succeeded()) {
@@ -153,6 +184,30 @@ public class WebChatServer extends AbstractVerticle {
                         .putHeader("Access-Control-Allow-Origin", "*")
                         .putHeader("content-type", "application/json; charset=utf-8")
                         .end(res.result().toString());
+                    }
+                    else{
+                        routingContext.response().setStatusCode(204).end();
+                    }      
+                }
+                else{
+                    routingContext.response().setStatusCode(500).end();  
+                } 
+            });  
+        });
+
+        router.get("/files/:uuid").handler(routingContext -> {
+            String uuid = routingContext.request().getParam("uuid");
+            System.out.println("Claim for file: " + uuid);
+            JsonObject query = new JsonObject().put("params.uuid", uuid);
+            mongoDBclient.findOne("messages", query, null, res -> {
+                if (res.succeeded()) {
+                    if (res.result()!=null){
+                        JsonObject message = new JsonObject(res.result().toString());
+                        routingContext.response()
+                        .putHeader("Content-Type", "multipart/form-data")
+                        .putHeader("Content-Disposition", "attachment; filename=\""+message.getJsonObject("params").getString("fileName")+"\"")
+                        .putHeader("Transfer-Encoding", "chunked")
+                        .sendFile("files/"+uuid).end();
                     }
                     else{
                         routingContext.response().setStatusCode(204).end();
