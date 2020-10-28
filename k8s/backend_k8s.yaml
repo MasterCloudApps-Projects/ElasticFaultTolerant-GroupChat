@@ -104,6 +104,14 @@ spec:
           backend:
             serviceName: webchat      
             servicePort: 8080
+        - path: /images
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
+        - path: /files
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
 
 ---
 apiVersion: v1
@@ -182,6 +190,38 @@ spec:
       name: cpu
       targetAverageUtilization: 75
 
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: eftgca-backvertx-pv-volume
+  namespace: mscarceller
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/files"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eftgca-backvertx-pv-claim
+  namespace: mscarceller
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
 
 ---
 
@@ -204,8 +244,12 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
+      volumes:
+      - name: eftgca-backvertx-pv-storage
+        persistentVolumeClaim:
+          claimName: eftgca-backvertx-pv-claim
       containers:
-      - image: mscarceller/eftgca-backvertx:0.1.0
+      - image: mscarceller/eftgca-backvertx:1.1.0
         imagePullPolicy: Always
         name: webchatbackend
         ports:
@@ -218,6 +262,9 @@ spec:
             cpu: 500m
           requests:
             cpu: 200m
+        volumeMounts:
+          - mountPath: "/project/file-uploads"
+            name: eftgca-backvertx-pv-storage
       terminationGracePeriodSeconds: 60
 
 --- 
@@ -238,7 +285,7 @@ spec:
     spec:
       containers:
         - name: webchatfront
-          image: mscarceller/eftgca-front:0.1.0
+          image: mscarceller/eftgca-front:1.1.0
           imagePullPolicy: Always
           ports:
           - containerPort: 8081
