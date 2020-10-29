@@ -219,6 +219,16 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - webchatbackend
+            topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: webchatbackend-pv-storage
         persistentVolumeClaim:
