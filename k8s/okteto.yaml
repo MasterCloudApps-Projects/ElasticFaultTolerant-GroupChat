@@ -230,7 +230,7 @@ spec:
                 - webchatbackend
             topologyKey: "kubernetes.io/hostname"
       volumes:
-      - name: webchatbackend-pv-storage
+      - name: eftgca-backvertx-pv-storage
         persistentVolumeClaim:
           claimName: eftgca-backvertx-pv-claim
       containers:
@@ -248,8 +248,8 @@ spec:
           requests:
             cpu: 200m
         volumeMounts:
-          - mountPath: "/app-data"
-            name: webchatbackend-pv-storage
+          - mountPath: "/project/file-uploads"
+            name: eftgca-backvertx-pv-storage
       terminationGracePeriodSeconds: 60
 --- 
 
