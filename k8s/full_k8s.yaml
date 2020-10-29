@@ -149,7 +149,27 @@ spec:
       protocol: TCP
       port: 8080
       targetPort: 8080
-  
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: webchatfrontservice
+  namespace: mscarceller
+  labels:
+    webchatcluster: "true"
+    app: webchatfront
+    type: LoadBalancer
+spec:
+  selector:
+    app: webchatfront
+  type: LoadBalancer
+  ports:
+    - name: webchatfront-port
+      protocol: TCP
+      port: 8081
+      targetPort: 8081
+      
 ---
 
 apiVersion: autoscaling/v2beta1
@@ -247,3 +267,25 @@ spec:
             name: eftgca-backvertx-pv-storage
       terminationGracePeriodSeconds: 60
 
+--- 
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webchatfront
+  namespace: mscarceller
+spec:
+  selector:
+    matchLabels:
+      app: webchatfront
+  template:
+    metadata:
+      labels:
+        app: webchatfront
+    spec:
+      containers:
+        - name: webchatfront
+          image: mscarceller/eftgca-front:1.1.0
+          imagePullPolicy: Always
+          ports:
+          - containerPort: 8081
