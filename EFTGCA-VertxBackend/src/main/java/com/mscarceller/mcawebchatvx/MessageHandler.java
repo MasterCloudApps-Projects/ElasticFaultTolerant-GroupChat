@@ -1,16 +1,12 @@
 package com.mscarceller.mcawebchatvx;
 
 import com.mscarceller.mcawebchatvx.model.Method;
-import com.mscarceller.mcawebchatvx.model.messages.Request;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
 public class MessageHandler {
 
-    MessageHandler() {
-
-    }
+    MessageHandler() {}
 
     public Method getMethod(String jsonMessageString) throws JSONException {
         System.out.println("Decoding incoming message: " + jsonMessageString);
@@ -27,6 +23,10 @@ public class MessageHandler {
         else if(jsonMessage.getString("method").equalsIgnoreCase("imageMessage")){
             System.out.println("Incoming image decoded: " + Method.IMAGE_MESSAGE);
             return Method.IMAGE_MESSAGE;
+        }
+        else if(jsonMessage.getString("method").equalsIgnoreCase("fileMessage")){
+            System.out.println("Incoming file decoded: " + Method.FILE_MESSAGE);
+            return Method.FILE_MESSAGE;
         }
         else if(jsonMessage.getString("method").equalsIgnoreCase("reconnect")){
             System.out.println("Incoming message decoded: " + Method.RECONNECT);

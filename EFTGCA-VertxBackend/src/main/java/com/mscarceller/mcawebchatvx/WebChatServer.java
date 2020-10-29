@@ -1,13 +1,10 @@
 package com.mscarceller.mcawebchatvx;
 
 import java.util.Map;
-import java.util.HashMap;
 import java.util.Set;
-import java.util.List;
 import java.util.Iterator;
 import java.util.HashSet;
 import java.util.concurrent.TimeUnit;
-
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -19,7 +16,6 @@ import com.mscarceller.mcawebchatvx.model.messages.ErrorResponse;
 import com.mscarceller.mcawebchatvx.model.messages.Notification;
 import com.mscarceller.mcawebchatvx.model.messages.Request;
 import com.mscarceller.mcawebchatvx.model.messages.SuccessResponse;
-
 
 import org.json.JSONException;
 
@@ -35,10 +31,8 @@ import io.vertx.core.http.HttpMethod;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
 import io.vertx.core.http.ServerWebSocket;
-import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.StaticHandler;
 import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.CorsHandler;
 import io.vertx.ext.web.FileUpload;
@@ -88,7 +82,7 @@ public class WebChatServer extends AbstractVerticle {
         });
 
         HttpServerOptions httpServerOptions = new HttpServerOptions();
-        httpServerOptions.setMaxWebsocketFrameSize(1024*1024);
+        httpServerOptions.setMaxWebSocketFrameSize(1024*1024);
         server = vertx.createHttpServer(httpServerOptions);
         
         messageHandler = new MessageHandler();
@@ -233,7 +227,6 @@ public class WebChatServer extends AbstractVerticle {
                     System.out.println("Incoming message in server: " + message);
 
                     try {
-                        int i = 1;
                         switch (messageHandler.getMethod(data.toString())){
                             case JOIN_ROOM:
                                 registerNewUserInRoom(message, serverWebSocket, false);
