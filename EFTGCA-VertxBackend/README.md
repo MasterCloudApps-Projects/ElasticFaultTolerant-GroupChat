@@ -651,6 +651,26 @@ spec:
 
 
 
+**NOTE**: For deploy in Okteto cloud its necessary to assign all the pods to the same node, in order it can share the same persistent volume, because we are not the sys-admins to create a persistent volume in the host. Add the next code snippet inside template specs:
+
+```yaml
+podAffinity:
+  requiredDuringSchedulingIgnoredDuringExecution:
+	  - labelSelector:
+		  matchExpressions:
+		  - key: app
+			operator: In
+			values:
+			- webchatbackend
+		topologyKey: "kubernetes.io/hostname"
+```
+
+Node affinity is conceptually similar to `nodeSelector` -- it allows you to constrain which nodes your pod is eligible to be scheduled on, based on labels on the node.
+
+This is included in the *okteto.yaml* manifest inside k8s folder
+
+You can find more details here: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#inter-pod-affinity-and-anti-affinity
+
 ---
 <a name="build"></a>
 ## 4. Building and publish the image into DockerHub
