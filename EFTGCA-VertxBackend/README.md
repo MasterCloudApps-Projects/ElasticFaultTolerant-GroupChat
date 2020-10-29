@@ -55,6 +55,10 @@ When an user send a new message through the websocket the server publish it into
 
 When an user send an image message through the API Rest (Post action) the server process it like a text message and send an notification to the other users using the event bus. When the clients receive this notification claim for the image using the API Rest (GET action) and download the image message.
 
+When an user send an file message through the API Rest (Post action) the server process it like a image message and send the messages to the other users with the name and unique identifier of the file. The users can download the file through an API Rest endpoint exposed by the server or through an specific function provided by the messages library.
+
+
+
 
 
 - #### First of all: loading Application config.
@@ -229,6 +233,27 @@ When a node is going to shutdown (because a scale-down), the server publish an e
 <p align="center">
   <img width="700" src=../Documents/images/uml_sendImageMessage.png>
 </p>
+
+
+
+
+
+
+
+* #### Sending and receiving file messages:
+
+  When an user send a file message to the application, in order to not collapse the websocket the library really send the message through an API rest published by the server. It get the file and save it into a persistent volume, save the message content into the MongoDB and send a message to the other users using the Event Bus in the same way that it does with text messages, with the name and unique identifier of the file in the server. When the clients, receive this kind of messages can download the file form the server  through the API Rest.
+
+  The basic flow:
+
+  
+
+<p align="center">
+  <img width="740" src=../Documents/images/uml_sendFileMessage.png>
+</p>
+
+
+
 
 
 
@@ -520,11 +545,56 @@ You can see [Horizontal Pod Autoscaler](https://kubernetes.io/docs/tasks/run-app
 
 
 
+- #### Persistent Volume
+
+A *PersistentVolume* (PV) is a piece of storage in the cluster that, as we describe in Introduction document, remain available outside of the pod lifecycle.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: eftgca-backvertx-pv-volume
+  namespace: mscarceller
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/files"
+```
+
+
+
+- #### Persistent Volume Claims 
+
+A *PersistentVolumeClaim* (PVC) is a request for storage by a user.
+
+```yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eftgca-backvertx-pv-claim
+  namespace: mscarceller
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
+```
+
+
+
 - #### Application Deployment
 
-It defines the specs that we need to deploy our applications such as image name, or ports, or resoruces.
+It defines the specs that we need to deploy our applications such as image name, or ports, or resources.
 
-This is the deployment of our application
+This is the deployment of our application:
 
 ```yaml
 apiVersion: apps/v1
@@ -546,6 +616,10 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
+      volumes:
+      - name: eftgca-backvertx-pv-storage
+        persistentVolumeClaim:
+          claimName: eftgca-backvertx-pv-claim
       containers:
       - image: mscarceller/eftgca-backvertx:0.1.0
         imagePullPolicy: Always
@@ -560,6 +634,9 @@ spec:
             cpu: 500m
           requests:
             cpu: 200m
+          volumeMounts:
+          - mountPath: "/project/file-uploads"
+            name: eftgca-backvertx-pv-storage
       terminationGracePeriodSeconds: 60
 
 ```

@@ -22,7 +22,7 @@ The code is distributed in the following folders:
 
 * [EFTGCA-MessagesLib](EFTGCA-MessagesLib): JavaScript library to manage messages.
 
-* [EFTGCA-VertxAppTests](EFTGCA-VertxAppTests): JavaScript scripts used for Vert.x app testing.
+* [EFTGCA-VertxAppTests](EFTGCA-VertxAppTests): JavaScript scripts used for Vert.x backend testing.
 
 * [EFTGCA-Front](EFTGCA-Front): Angular front end example.
 
@@ -49,7 +49,14 @@ All the messages sent to the server are persisted into a MongoDB. MongoDB provid
 
 ​		When a new user join into a room the server could sent it the last messages received in this room.
 
-​		When an user reconnect to the backend, after a disconnected period, the server send to it the last messages received from other useres (see next section: fault-tolerance).
+​		When an user reconnect to the backend, after a disconnected period, the server send to it the last messages received from other users (see next section: fault-tolerance).
+
+The files sent to the server are stored in a Persistent Volume, in order to be available for all the nodes.
+
+There are currently two types of storage available with Kubernetes: Volumes and Persistent Volumes. A Kubernetes volume exists only while the containing pod exists. Once the pod is deleted, the associated volume is also deleted. On the other hand, Kubernetes persistent volumes remain available outside of the pod lifecycle – this means that the volume will remain even after the pod is deleted. It is available to claim by another pod if required, and the data is retained.
+
+So we use Kubernetes persistent volumes because the data needs to be retained regardless of the pod lifecycle. 
+
 
 
 

@@ -81,6 +81,8 @@ service/webchatservice created
 service/webchat created
 horizontalpodautoscaler.autoscaling/webchat-consumer created
 deployment.apps/webchatbackend created
+persistentvolume/eftgca-backvertx-pv-volume created
+persistentvolumeclaim/eftgca-backvertx-pv-claim created
 ```
 
 
@@ -210,6 +212,14 @@ spec:
             serviceName: webchatfrontservice      
             servicePort: 8081
         - path: /chat
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
+        - path: /images
+          backend:
+            serviceName: webchat      
+            servicePort: 8080
+        - path: /files
           backend:
             serviceName: webchat      
             servicePort: 8080
