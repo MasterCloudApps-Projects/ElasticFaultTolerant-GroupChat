@@ -239,9 +239,9 @@ spec:
             containerPort: 5701
         resources:
           limits:
-            cpu: 200m
-          requests:
             cpu: 500m
+          requests:
+            cpu: 250m
         volumeMounts:
           - mountPath: "/project/file-uploads"
             name: eftgca-backvertx-pv-storage
