@@ -272,6 +272,16 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - webchatbackend
+            topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: eftgca-backvertx-pv-storage
         persistentVolumeClaim:
@@ -289,7 +299,7 @@ spec:
           limits:
             cpu: 500m
           requests:
-            cpu: 200m
+            cpu: 250m
         volumeMounts:
           - mountPath: "/project/file-uploads"
             name: eftgca-backvertx-pv-storage
