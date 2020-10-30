@@ -86,6 +86,8 @@ When an user send an file message through the API Rest (Post action) the server 
         });
 ```
 
+In order to be able to do this kind of config retrieve from the application in a Pod is necessary to set a Role inside the cluster, also described in the [Kubernetes architecture elements](#k8s) section.
+
 
 
 - #### Create a Hazelcast Cluster for users:
@@ -587,6 +589,47 @@ spec:
     requests:
       storage: 3Gi
 ```
+
+
+
+- #### Role and RoleBinding: 
+
+An RBAC *Role* contains the rules that represent a set of permissions. In our case we need permissions to get, watch and read a configmap named *eftgca-backvertx-configmap*. A Role always sets permissions within a particular namespace so we also specify the namespace it belongs in.
+
+A *RoleBinding* grants the permissions defined in the role. It holds a list of *subjects* (users, groups, or service accounts), and a reference to the role being granted. A RoleBinding grants permissions within a specific namespace.
+
+```yaml
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: mscarceller
+  name: namespace-reader
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["eftgca-backvertx-configmap"]
+    verbs: ["get", "list", "watch"]
+
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: namespace-reader-binding
+  namespace: mscarceller
+subjects:
+- kind: ServiceAccount
+  name: default
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: namespace-reader
+  apiGroup: ""
+
+```
+
+You can see [Using RBAC Authorization](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) for more details.
 
 
 
