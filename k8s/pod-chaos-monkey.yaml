@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: kubernetes-pod-chaos-monkey
-        image: codeurjc/kubernetes-pod-chaos-monkey:latest
+        image: mscarceller/k8s-pod-chaos-monkey:1.0.0
         imagePullPolicy: Always
         env:
         - name: TAG
