@@ -1,0 +1,29 @@
+@startuml
+
+title "Files Messages - Sequence Diagram"
+
+actor "User 1\n(messages library)"
+actor "User 2\n(messages library)"
+participant "Server\n(Server Verticle)"
+participant "Server\n(Client Verticle)"
+participant "EventBus"
+database "messages MongoDB"
+database "Persistent Volume"
+
+
+"User 1\n(messages library)" -> "Server\n(Server Verticle)" : send File Message (API Rest POST)
+"Server\n(Server Verticle)" -> "Persistent Volume" : store message into PV
+"Server\n(Server Verticle)" -> "messages MongoDB" : store message into DB
+"Server\n(Server Verticle)" -> "EventBus" : publish message
+
+
+
+"EventBus" -> "Server\n(Client Verticle)" : read file message
+"Server\n(Client Verticle)" -> "User 2\n(messages library)" : read file message
+
+"User 2\n(messages library)" -> "Server\n(Server Verticle)" : claim for File (API Rest GET)
+"Server\n(Server Verticle)" -> "Persistent Volume" : recover File from PV
+"Server\n(Server Verticle)" <- "Persistent Volume" : recover File from PV
+"User 2\n(messages library)" <- "Server\n(Server Verticle)" : get file
+
+@enduml

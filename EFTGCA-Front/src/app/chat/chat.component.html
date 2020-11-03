@@ -16,7 +16,8 @@
         <p-scrollPanel  #scrollChatContainer (ngChange)="scrollToBottom()" [style]="{width: '100%', height: '400px','background-color':'#fff7e6'}">
             <app-chatmessage *ngFor="let message of this.chatMessagesManager.getMessages() | keyvalue: valueAscOrder" 
                 [userName]="(message.value.params.userName!=this.userName) ? message.value.params.userName : ''"
-                [text]="(message.value.method == 'textMessage') ? message.value.params.text :  message.value.params.base64ImgString"
+                [text]="(message.value.method == 'textMessage') ? message.value.params.text :  ((message.value.method == 'fileMessage') ? message.value.params.fileName : message.value.params.base64ImgString)"
+                [uuid]="message.value.params.uuid"
                 [date]="message.value.params.date"
                 [method]="message.value.method"
                 [type]="message.value.params.type"
@@ -27,11 +28,14 @@
     <p-footer>
 
         <div class="p-grid">
-            <div class="p-col-9">
+            <div class="p-col-8">
                 <div class="box"><input style="width:100%" type="text" (keydown.enter)="sendMessage()" [(ngModel)]="this.messageText" pInputText /> &nbsp;</div>
             </div>
-            <div class="p-col-1" style="text-align: center;">
-                <div class="box"><img src="../../assets/imagesIcon.png" style="cursor: pointer" alt="imgButton" width="30px" (click)="uploadImage.click()"></div>
+            <div class="p-col-2" style="text-align: center;">
+                <div class="box">
+                    <i class="pi pi-images" style="color: blue; cursor:pointer; font-size: 2.4em" (click)="uploadImage.click()"></i>&nbsp;&nbsp;&nbsp;
+                    <i class="pi pi-paperclip" style="color: green; cursor:pointer; font-size: 2.4em" (click)="uploadFile.click()"></i>
+                </div>
             </div>
             <div class="p-col-2">
                 <div class="box"><button pButton type="button" style="width: 100%;" (click)="sendMessage()" label="Send" class="ui-button-rounded ui-button-success"></button></div>
@@ -67,6 +71,10 @@
 
 <div style="visibility: hidden;">
     <input #uploadImage type="file" id="file" (change)="handleImageInput($event)">
+</div>
+
+<div style="visibility: hidden;">
+    <input #uploadFile type="file" id="file" (change)="handleFileInput($event)">
 </div>
 
 

@@ -24,7 +24,7 @@ Log in to [Okteto Cloud](https://cloud.okteto.com/), and click on the Deploy but
 
 <div style="text-align:center">
 
-![InstallLitmusEnviroment_1](./images/InstallLitmusEnviroment_1.png)
+![InstallLitmusEnviroment_1](../Documents/images/InstallLitmusEnviroment_1.png)
 
 </div>
 
@@ -32,7 +32,7 @@ Then you customize the configuration values. Once you're ready, click on the Dep
 
 <div style="text-align:center">
 
-![InstallLitmusEnviroment_2](./images/InstallLitmusEnviroment_2.png)
+![InstallLitmusEnviroment_2](../Documents/images/InstallLitmusEnviroment_2.png)
 
 </div>
 
@@ -42,7 +42,7 @@ As soon as your Helm release is deployed, you'll see its state in the UI.
 
 <div style="text-align:center">
 
-![InstallLitmusEnviroment_3](./images/InstallLitmusEnviroment_3.png)
+![InstallLitmusEnviroment_3](../Documents/images/InstallLitmusEnviroment_3.png)
 
 </div>
 

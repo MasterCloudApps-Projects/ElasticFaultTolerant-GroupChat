@@ -5,9 +5,9 @@ Originally design for the [Elastic & FaultTolerant GroupChat Application.](https
 
 
 ## Changelog
-Current Version: 3.1.0 - Release 2020-10-27
+Current Version: 3.2.0 - Release 2020-10-27
 
-* Images messages type available
+* Files messages type available for browser and console
 
   
 
@@ -40,6 +40,11 @@ Next example show how to use the library to send a *joinRoom* Message, and send/
 
     // suscribe to imageMessage event:
     chatMessagesManager.on('imageMessage',(imageMessage) => {
+      console.log(message)
+    });
+
+    // suscribe to fileMessage event:
+    chatMessagesManager.on('fileMessage',(imageMessage) => {
       console.log(message)
     });
 
@@ -113,6 +118,7 @@ The ChatMessagesManager emmit events:
 |EVENT_RECONNECT (reconnect)|Reconnect notification message|Reconnection notification|
 |EVENT_TEXT_MESSAGE (textMessage)|Text Message|Notify new text message in room|
 |EVENT_IMAGE_MESSAGE (imageMessage)|Image Message|Notify new image message in room|
+|EVENT_FILE_MESSAGE (fileMessage)|File Message|Notify new file message in room|
 ---
 
 
@@ -302,6 +308,41 @@ https://www.jsonrpc.org/specification
     "id": 2
   }
   ```
+
+  * **File message**: user want to send a text message:
+
+  Client Message
+
+  ```json
+  {
+    "jsonrpc": "2.0",
+    "method": "textMessage",
+    "params": {
+      "userId": "xxxxxxxxxxxxx",
+      "roomName": "Room 1",
+      "userName": "User 1",
+      "fileName": "This is the imageBase64 string",
+      "fileContent": "This is the imageBase64 string",
+      "ack": false,
+      "uuid": "8475234jh62356580672306",
+      "date": "01/01/2020 10:12:32"
+    },
+    "id": 2
+  }
+  ```
+
+  Server Response
+
+  ```json
+  {
+    "jsonrpc": "2.0",
+    "result": {
+      "status": "OK",
+      },
+    "id": 2
+  }
+  ```
+
 * **System/Server Message**: the server send system messages to a user also to be shown on the chat
 
   Server Notification example

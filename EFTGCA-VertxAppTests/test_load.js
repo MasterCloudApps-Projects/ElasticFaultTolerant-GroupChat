@@ -1,19 +1,18 @@
 var ChatMessagesManager = require('../EFTGCA-MessagesLib/index.js');
 var fs = require('fs');
 
-//const url = 'wss://webchat-mscarceller.cloud.okteto.net/chat';
-const wsurl = 'ws://localhost:8080/chat';
+//const wsurl = 'wss://webchat-mscarceller.cloud.okteto.net/chat';
+//const wsurl = 'ws://localhost:8080/chat';
+const wsurl = 'ws://webchat-mscarceller.cloud.okteto.net/chat';
 const apiurl = 'http://localhost:8080';
 const TEST_USERID = "UserId_";
 const TEST_USERNAME = "UserName ";
 const TEST_ROOMNAME = "Tests Room";
-const USER_TESTS = 5;
-const MSGS_TEST = 10;
+const USER_TESTS = 20;
+const MSGS_TEST = 200;
 
 var chatMessagesManagerArray = [];
 var chatMessagesManagerReConnections = 0;
-
-console.log("ss"+ process.argv[2]);
 
 
 testWithNUsers(USER_TESTS);
@@ -76,7 +75,7 @@ function sendMessages(usersCount){
             let randomMessage = i + "_" + j + ": " + makeRandomMessage(15);
             chatMessagesManagerArray[i].sendTextMessage(randomMessage);
            // console.log("Sending Message: " + randomMessage);
-            sleep(250);
+            sleep(125);
         }
     }
 
@@ -84,7 +83,7 @@ function sendMessages(usersCount){
 
     setTimeout(function() {
         checkTestsResult(usersCount);
-    }, 5000)
+    }, 60000)
 }
 
 function checkTestsResult(usersCount){

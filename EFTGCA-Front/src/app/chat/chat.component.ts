@@ -104,6 +104,13 @@ export class ChatComponent implements OnInit {
       setTimeout(() => this.scrollToBottom(), 125);
     });
 
+    this.chatMessagesManager.on('fileMessage',(message) => {
+      if (message.roomName != this.roomName){
+        return;
+      }
+      setTimeout(() => this.scrollToBottom(), 125);
+    });
+
     this.chatMessagesManager.on('newUser',(message) => {
       console.log(message.text)
     });
@@ -238,5 +245,15 @@ export class ChatComponent implements OnInit {
           this.chatMessagesManager.sendImageMessage(reader.result.toString().replace(/^[^,]+, */, ''));
       };
     }
+
+    handleFileInput(event: any){
+      const file = event.target.files[0];
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      reader.onload = () => {
+        this.chatMessagesManager.sendFileMessage(file.name, file);
+      };
+    } 
+    
 
 }

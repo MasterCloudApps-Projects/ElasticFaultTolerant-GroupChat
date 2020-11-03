@@ -1,4 +1,11 @@
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: mscarceller
+
+---
+
+apiVersion: v1
 kind: ConfigMap
 metadata:
   name: eftgca-backvertx-configmap
@@ -8,7 +15,35 @@ data:
   maxMessagesHistory: '100'
 
 ---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: mscarceller
+  name: namespace-reader
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps"]
+    resourceNames: ["eftgca-backvertx-configmap"]
+    verbs: ["get", "list", "watch"]
 
+---
+
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: namespace-reader-binding
+  namespace: mscarceller
+subjects:
+- kind: ServiceAccount
+  name: default
+  apiGroup: ""
+roleRef:
+  kind: Role
+  name: namespace-reader
+  apiGroup: ""
+
+--- 
+ 
 apiVersion: v1
 kind: Secret
 metadata:
@@ -20,21 +55,6 @@ data:
   MONGO_ROOT_PASSWORD: cGFzc3dvcmQK
   
 ---
-
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: eftgca-backvertx-pv-claim
-  namespace: mscarceller
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-
----
-
 apiVersion: v1
 kind: Service
 metadata:
@@ -191,12 +211,45 @@ spec:
     kind: Deployment
     name: webchatbackend
   minReplicas: 2
-  maxReplicas: 4
+  maxReplicas: 10
   metrics:
   - type: Resource
     resource:
       name: cpu
       targetAverageUtilization: 75
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: eftgca-backvertx-pv-volume
+  namespace: mscarceller
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/files"
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: eftgca-backvertx-pv-claim
+  namespace: mscarceller
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 3Gi
 
 ---
 
@@ -219,16 +272,6 @@ spec:
         app: webchatbackend
         component: webchatservice
     spec:
-      affinity:
-        podAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-          - labelSelector:
-              matchExpressions:
-              - key: app
-                operator: In
-                values:
-                - webchatbackend
-            topologyKey: "kubernetes.io/hostname"
       volumes:
       - name: eftgca-backvertx-pv-storage
         persistentVolumeClaim:
@@ -246,11 +289,12 @@ spec:
           limits:
             cpu: 500m
           requests:
-            cpu: 250m
+            cpu: 200m
         volumeMounts:
           - mountPath: "/project/file-uploads"
             name: eftgca-backvertx-pv-storage
       terminationGracePeriodSeconds: 60
+
 --- 
 
 apiVersion: apps/v1

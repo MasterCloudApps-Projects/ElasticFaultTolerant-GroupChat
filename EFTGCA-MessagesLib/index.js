@@ -1,5 +1,7 @@
 const WebSocket = require('isomorphic-ws');
 const axios = require('axios')
+const fs = require('fs')
+const FormData = require('form-data')
 let EventEmitter = require('events').EventEmitter;
 var uuid = require('uuid');
 
@@ -21,11 +23,13 @@ const EVENT_NEW_USER = "newUser";
 const EVENT_RECONNECT = "reconnect";
 const EVENT_TEXT_MESSAGE = "textMessage";
 const EVENT_IMAGE_MESSAGE = "imageMessage";
+const EVENT_FILE_MESSAGE = "fileMessage";
 
 // Methods read/write from/into the socket 
 const METHOD_NEW_USER = "newUser";
 const METHOD_TEXT_MESSAGE = "textMessage";
 const METHOD_IMAGE_MESSAGE = "imageMessage";
+const METHOD_FILE_MESSAGE = "fileMessage";
 const METHOD_JOIN_ROOM = "joinRoom";
 const METHOD_RECONNECT = "reconnect";
 
@@ -48,13 +52,6 @@ class ChatMessagesManager extends EventEmitter {
         this.messages = new Map();
         this.serviceMessages = new Map();
         this.pendingMessages = new Map();
-
-        this.imageAPIOptions = {
-            host: this.apiurl,
-            path: "/images",
-            method: "POST",
-            headers: {"Content-Type": "application/json"}
-        };
         
         this.reconnectUser = function(){
             let self = this;
@@ -166,6 +163,17 @@ class ChatMessagesManager extends EventEmitter {
                     console.log(e);
                 })  
             }
+
+            if(this.isFileMessage(message)){
+                if(this.messages.has(message.params.uuid)){
+                    this.messages.get(message.params.uuid).params.ack = true;
+                    this.pendingMessages.delete(message.params.uuid);
+                }
+                else{
+                    this.messages.set(message.params.uuid,message);
+                }
+                this.emit(EVENT_FILE_MESSAGE, message.params);  
+            }
         }
 
         this.isResponseMessage = function(message){
@@ -196,6 +204,13 @@ class ChatMessagesManager extends EventEmitter {
             }
             return false;
         }
+
+        this.isFileMessage = function(message){
+            if (message.hasOwnProperty('method') && message.hasOwnProperty('id')){
+                return (message.method === METHOD_FILE_MESSAGE);
+            }
+            return false;
+        }
     
         this.isReconnectMessage = function(message){
             if (message.hasOwnProperty('method') && message.hasOwnProperty('id')){
@@ -219,7 +234,10 @@ class ChatMessagesManager extends EventEmitter {
         this.sendPendingMessages = function(){
             for (const [key, value] of this.pendingMessages) {
                 if (value.method==METHOD_IMAGE_MESSAGE){
-                    this.writeImageMessageToAPIRest(value)
+                    this.writeImageMessageToAPIRest(value);
+                }
+                else if (value.method==METHOD_FILE_MESSAGE){
+                    this.writeFileMessageToAPIRest(value);
                 }
                 else{
                     this.writeMessageIntoWebSocket(value);
@@ -229,12 +247,25 @@ class ChatMessagesManager extends EventEmitter {
     
         this.writeImageMessageToAPIRest = function(message){
             axios.post(this.apiurl+"/images", JSON.stringify(message), {headers: {'content-type': 'application/json'}})
-                .then((res) => {
-                    if(this.verbose) console.log(res.data)
-                })
-                .catch((error) => {
-                    console.error(error)
-                })
+            .then((res) => {
+                if(this.verbose) console.log(res.data)
+            })
+            .catch((error) => {
+                console.error(error)
+            })
+        }
+
+        this.writeFileMessageToAPIRest = function(message){
+            const formData = new FormData()
+            formData.append('files[]', message.params.fileContents, 'package.json');
+            formData.append('message', JSON.stringify(message));
+            let headers = this.isRunningOnConsole() ? formData.getHeaders() : {'Content-Type': 'multipart/form-data'}
+            axios.post(this.apiurl+"/files", formData, {headers: headers}).then((res) => {
+                if(this.verbose) console.log(res.data)
+            })
+            .catch((error) => {
+                console.error(error)
+            })
         }
     
         this.writeMessageIntoWebSocket = function(message){
@@ -244,9 +275,14 @@ class ChatMessagesManager extends EventEmitter {
             }
         }
 
+        this.isRunningOnConsole = function(){
+            return (typeof window === 'undefined') 
+        }
+
         this.connectWebSocket().then(() => {
             if(this.verbose) console.log("WebSocket initializated succesfully");
         })
+  
 
     }
 
@@ -325,6 +361,45 @@ class ChatMessagesManager extends EventEmitter {
         this.messages.set(messageUUID,imageMessage);
         this.pendingMessages.set(messageUUID,imageMessage);
         this.sendPendingMessages();
+    }
+
+    sendFileMessage(fileName, fileContents){
+        let messageUUID = uuid.v4();
+        let id = this.getNewId()
+        let fileMessage = { 
+            jsonrpc: JSONRPC_VERSION,
+            method: METHOD_FILE_MESSAGE,
+            params: {
+                userId: this.userId,
+                roomName: this.roomName,
+                userName: this.userName,
+                fileName: fileName,
+                fileContents: fileContents,
+                ack: false,
+                uuid: messageUUID,
+                date: new Date()
+            },
+            id: id
+        }
+        this.messages.set(messageUUID,fileMessage);
+        this.pendingMessages.set(messageUUID,fileMessage);
+        this.sendPendingMessages();
+    }
+
+    async downloadFileMessage(message){
+
+        const fileName = JSON.parse(message).params.fileName;
+        const url = this.apiurl+'/files/' + JSON.parse(message).params.uuid;
+        const path = 'files/' + fileName;
+        const writer = fs.createWriteStream(path)
+    
+        const response = await axios({url,method: 'GET',responseType: 'stream'})
+        response.data.pipe(writer)
+
+        return new Promise((resolve, reject) => {
+            writer.on('finish', resolve)
+            writer.on('error', reject)
+        })
     }
 
 }

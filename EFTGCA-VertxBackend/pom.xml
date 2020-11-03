@@ -77,12 +77,12 @@
     <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-config-kubernetes-configmap</artifactId>
-      <version>3.9.3</version>
+      <version>3.9.4</version>
      </dependency>
      <dependency>
       <groupId>io.vertx</groupId>
       <artifactId>vertx-config</artifactId>
-      <version>3.9.3</version>
+      <version>3.9.4</version>
      </dependency>
 
     <dependency>

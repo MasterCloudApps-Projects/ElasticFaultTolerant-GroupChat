@@ -7,7 +7,8 @@ public enum Method {
     NOTIFY("notify"),
     NEW_USER("newUser"),
     TEXT_MESSAGE("textMessage"),
-    IMAGE_MESSAGE("imageMessage");
+    IMAGE_MESSAGE("imageMessage"),
+    FILE_MESSAGE("fileMessage");
 
     private String description;
 

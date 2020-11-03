@@ -8,5 +8,6 @@ RUN apt-get update; apt-get install -y netcat
 COPY --from=builder /project/target/*.jar /project/
 COPY cluster/cluster.xml /cluster/
 WORKDIR /project
+RUN mkdir file-uploads
 EXPOSE 8080 8081
 CMD ["java", "-jar", "mca-webchat-vertx-fat.jar", "-cluster","-cp","/cluster/"]
