@@ -36,9 +36,7 @@ Please, visit the [Elastic & FaultTolerant GroupChat Application Messages Lib](.
 
 ## 3. Testing the backend
 
-Please, visit the [Chaos Testing with Litmus and Okteto Cloud](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/blob/master/Documents/ChaosTestingOkteto.md) document.
-
-You can find some test examples of testing scripts in the [EFTGCA-VertxAppTests](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-VertxAppTests) project.
+Please, visit the [EFTGCA-VertxAppTests](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/tree/master/EFTGCA-VertxAppTests) project to get all the information about the backend tests.
 
 
 
