@@ -1,5 +1,6 @@
-
-<p-panel [style]="{'width':'800px'}">
+<div class="ui-fluid">
+    <div class="ui-g">          
+<p-panel class="ui-lg-12 ui-g-12 ui-g-12">
     <p-header>
         <div class="p-grid">
             <div class="p-col-4">
@@ -9,7 +10,7 @@
                 <div><b>{{this.userName}}</b></div>
             </div>
             <div class="p-col-4">
-                <div style="text-align: right;"><i class="pi pi-circle-on" [style.color]="getStatusColor()"></i></div>
+                <div style="text-align: right;"><i class="pi pi-wifi" [style.color]="getStatusColor()"></i></div>
             </div>   
         </div>
     </p-header>
@@ -26,22 +27,21 @@
             ></app-chatmessage>
         </p-scrollPanel>
     <p-footer>
+        <div class="ui-fluid">
+            <div class="ui-g">
+                    <div class="ui-lg-10 ui-g-10 ui-md-10 ">
+                        <div class="ui-inputgroup">
+                                <input style="width:100%" type="text" (keydown.enter)="sendMessage()" [(ngModel)]="this.messageText" pInputText />   
+                                <button pButton type="button" icon="pi pi-images" class="ui-button-warning " (click)="uploadImage.click()"></button> 
+                                <button pButton type="button" icon="pi pi-paperclip" class=" ui-button-warning " (click)="uploadFile.click()"></button>     
+                        </div>
 
-        <div class="p-grid">
-            <div class="p-col-8">
-                <div class="box"><input style="width:100%" type="text" (keydown.enter)="sendMessage()" [(ngModel)]="this.messageText" pInputText /> &nbsp;</div>
+                    </div>
+                    <div class="ui-lg-2 ui-g-2 ui-md-2 ">
+                        <button pButton type="button" style="width: 100%;" (click)="sendMessage()" icon="pi pi-arrow-right" class="ui-button-success"></button>
+                    </div>
             </div>
-            <div class="p-col-2" style="text-align: center;">
-                <div class="box">
-                    <i class="pi pi-images" style="color: blue; cursor:pointer; font-size: 2.4em" (click)="uploadImage.click()"></i>&nbsp;&nbsp;&nbsp;
-                    <i class="pi pi-paperclip" style="color: green; cursor:pointer; font-size: 2.4em" (click)="uploadFile.click()"></i>
-                </div>
-            </div>
-            <div class="p-col-2">
-                <div class="box"><button pButton type="button" style="width: 100%;" (click)="sendMessage()" label="Send" class="ui-button-rounded ui-button-success"></button></div>
-            </div>   
         </div>
-        
     </p-footer>
 
 </p-panel>
@@ -70,12 +70,14 @@
 
 
 <div style="visibility: hidden;">
-    <input #uploadImage type="file" id="file" (change)="handleImageInput($event)">
+    <input #uploadImage type="file" id="file" accept="image/*" (change)="handleImageInput($event)">
 </div>
 
 <div style="visibility: hidden;">
     <input #uploadFile type="file" id="file" (change)="handleFileInput($event)">
 </div>
 
+</div>
+</div>
 
 
