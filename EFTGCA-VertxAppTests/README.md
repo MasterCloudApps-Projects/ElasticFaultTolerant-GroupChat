@@ -3,7 +3,7 @@
 
 # Elastic & Fault Tolerant GroupChat Application Tests
 
-Javascript module for testing the Elastic & FaultTolerant GroupChat Application based on VertX
+Scripts for testing the Elastic & FaultTolerant GroupChat Application based on VertX
 
 
 1. [Load Test: testing the elasticity](#loadtest)
@@ -316,4 +316,4 @@ Total users reconnections: 7
 Test Finished
 ```
 
-In this example we can observe the number of necessary reconnections (7), and also the fact that there isn't messages lost
+In this example we can observe the number of necessary reconnections (7), and also the fact that there isn't lost messages.
