@@ -1,9 +1,9 @@
 
 
+
 # Elastic & Fault Tolerant GroupChat Application Tests
 
 Javascript module for testing the Elastic & FaultTolerant GroupChat Application based on VertX
-
 
 
 1. [Load Test: testing the elasticity](#loadtest)
@@ -13,13 +13,10 @@ Javascript module for testing the Elastic & FaultTolerant GroupChat Application 
 
 2. [Chaos: testing the fault tolerance](#caos)
 
-   
 
 <a name="loadtest"></a>
 
 ## 1. Load test: testing elasticity.
-
-
 
 **Load testing** is simply creating the capability to CPU management, that is important for production workloads and it can easily cause you issues if not managed appropriately.
 
@@ -30,6 +27,7 @@ We have implemented two different ways to make this kind of test, using a custom
  #### 1. Custom script for load testing
 
 This is a load test. We use a node script that initialize 10 users and performs a loop of text messages sending. 
+
 
 To show the HPA state we use the next command:
 
@@ -165,7 +163,6 @@ Test Finished
 Any message has been lost.
 
 
-
 <a name="load2"></a>
 
  #### 2. Load testing with Gremlin
@@ -234,8 +231,6 @@ The scenario result:
 
 ![](./images/gremling_scenario2.png)
 
-
-
 ---
 
 <a name="caos"></a>
@@ -250,11 +245,9 @@ We have implemented two different ways to make this kind of test, according with
 - Set up chaos testing for **cloud deployment**: please, visit the [Chaos Testing with Litmus and Okteto Cloud](https://github.com/MasterCloudApps-Projects/ElasticFaultTolerant-GroupChat/blob/master/EFTGCA-VertxAppTests/ChaosTestingOkteto.md) document.
 
 
-
 Once the chaos is started we can see how the pods are killed:
 
 ![](./images/008.png)
-
 
 
 Once you have setup your chaos system and you have your backend pods been killed periodically you can run the tests:
