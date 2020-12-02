@@ -1,3 +1,13 @@
+<div>
+<div style="float:left">
+<img src=".\Documents\images\logoCODEURJC.png" style="zoom:25%;text-align:left" />
+</div>
+<div style="float:right">
+<img src=".\Documents\images\logoMCA.png" style="zoom:30%;text-align:left" />
+</div>
+</div>
+<div style="clear:both"></div>
+
 # Elastic & Fault Tolerant GroupChat Application
 
 
@@ -27,7 +37,13 @@ The code is distributed in the following folders:
 
 
 
-[Here](./Documents/finalreport/MemoriaTFM.pdf) you can also download the project finel report.
+
+
+[Here](./Documents/finalreport/MemoriaTFM.pdf) you can also download the project final report.
+
+
+
+------
 
 
 
