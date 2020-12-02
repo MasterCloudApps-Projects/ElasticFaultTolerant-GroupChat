@@ -7,6 +7,7 @@
 </div>
 </div>
 <div style="clear:both"></div>
+&nbsp;  
 
 # Elastic & Fault Tolerant GroupChat Application
 
