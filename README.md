@@ -1,9 +1,9 @@
 <div>
 <div style="float:left">
-<img src=".\Documents\images\LogoCODEURJC.png" style="zoom:25%;text-align:left" />
+<img src=".\Documents\images\LogoCodeURJC.png" style=";text-align:left" width="120" />
 </div>
 <div style="float:right">
-<img src=".\Documents\images\LogoMCA.png" style="zoom:30%;text-align:left" />
+<img src=".\Documents\images\LogoMCA.png" style="text-align:left" width="150" />
 </div>
 </div>
 <div style="clear:both"></div>
