@@ -43,6 +43,10 @@ The code is distributed in the following folders:
 
 [Here](./Documents/finalreport/MemoriaTFM.pdf) you can also download the project final report.
 
+And show some video demos:
+
+* Demo 1: local deployment with minukube - https://www.youtube.com/watch?v=bNY3aOUXAGs
+* Demo 2: cloud deployment with Okteto - https://www.youtube.com/watch?v=aDVbC28yOyI
 
 
 ------
