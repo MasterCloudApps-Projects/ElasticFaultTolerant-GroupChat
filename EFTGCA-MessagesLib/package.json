@@ -14,7 +14,7 @@
   "author": "Miguel S.C. <mscarceller@gmail.com>",
   "license": "Apache V2.0",
   "dependencies": {
-    "axios": "0.20.0",
+    "axios": "0.21.2",
     "isomorphic-ws": "^4.0.1",
     "uuid": "8.3.0",
     "ws": "^7.3.1"
